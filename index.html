@@ -138,10 +138,24 @@
 <body class="min-h-screen flex flex-col lg:flex-row bg-clinical-bg text-clinical-ink pb-20 lg:pb-0">
 
     <!-- ========================================================================= -->
+    <!-- ================ AVISO DE PERMISOS FIREBASE (SI CORRESPONDE) ============ -->
+    <!-- ========================================================================= -->
+    <div id="cloud-permission-banner" class="hidden fixed top-0 inset-x-0 z-[60] bg-clinical-overdueText text-white px-4 py-2.5 shadow-elevated">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <p id="cloud-permission-banner-text" class="text-xs leading-relaxed">
+                Permiso denegado en Firebase: verificá en Firebase Console &gt; Firestore &gt; Reglas que diga <code class="font-mono-num bg-black/20 px-1.5 py-0.5 rounded">allow read, write: if true;</code> y tocá Publicar (o activá Acceso Anónimo en Authentication).
+            </p>
+            <button type="button" onclick="forceCloudSyncNow()" class="px-3 py-1 rounded-lg bg-white text-clinical-overdueText text-xs font-semibold shrink-0 hover:bg-red-50 transition">
+                Reintentar conexión
+            </button>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
     <!-- ================ PANTALLA DE ACCESO PROFESIONAL (LOGIN) ================= -->
     <!-- ========================================================================= -->
-    <div id="auth-screen" class="fixed inset-0 z-50 bg-clinical-bg flex flex-col justify-center items-center p-4 sm:p-6">
-        <div class="w-full max-w-md surface-card rounded-2xl p-6 sm:p-8 shadow-elevated space-y-6">
+    <div id="auth-screen" class="fixed inset-0 z-50 bg-clinical-bg flex flex-col justify-center items-center p-4 sm:p-6 overflow-y-auto">
+        <div class="w-full max-w-md surface-card rounded-2xl p-6 sm:p-8 shadow-elevated space-y-6 my-auto">
             <!-- Brand Header -->
             <div class="flex items-start justify-between border-b border-clinical-border pb-5">
                 <div class="flex items-center gap-3.5">
@@ -174,6 +188,7 @@
                 <div>
                     <label class="block text-xs font-medium text-clinical-ink mb-1.5">Usuario o correo profesional</label>
                     <input type="text" id="auth-username" required autocomplete="username" placeholder="laura.kocher" class="w-full px-3.5 py-2.5 rounded-xl text-sm input-clinical">
+                    <p class="text-[11px] text-clinical-muted mt-1">Ingresá el mismo usuario en tu celular y en tu PC para sincronizar tus datos.</p>
                 </div>
 
                 <div>
@@ -192,7 +207,7 @@
                     </div>
                 </div>
 
-                <div id="auth-error-box" class="hidden p-3 rounded-xl bg-clinical-overdueBg border border-red-200 text-xs text-clinical-overdueText font-medium"></div>
+                <div id="auth-error-box" class="hidden p-3 rounded-xl bg-clinical-overdueBg border border-red-200 text-xs text-clinical-overdueText font-medium leading-relaxed"></div>
 
                 <button type="submit" id="auth-submit-btn" class="w-full py-2.5 px-4 rounded-xl btn-primary text-sm font-semibold flex items-center justify-center gap-2">
                     <span id="auth-submit-text">Ingresar al consultorio</span>
@@ -204,7 +219,7 @@
 
             <!-- Info Footer -->
             <div class="pt-3 border-t border-clinical-border flex items-center justify-between text-[11px] text-clinical-muted">
-                <span>Sincronización encriptada multi-dispositivo</span>
+                <span>Sincronización multi-dispositivo (consultorio-laura)</span>
                 <span id="auth-cloud-ready" class="font-mono-num text-clinical-secondary">Conectando...</span>
             </div>
         </div>
@@ -345,11 +360,11 @@
 
                 <!-- Right Header Status & Actions -->
                 <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-                    <!-- Cloud Sync Status Pill -->
-                    <div id="sync-status-pill" class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-clinical-subtle border border-clinical-border text-[11px] font-medium text-clinical-secondary">
+                    <!-- Cloud Sync Status Pill (Clickable to force sync) -->
+                    <button type="button" onclick="forceCloudSyncNow()" title="Clic para sincronizar ahora con la nube" id="sync-status-pill" class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-clinical-subtle hover:bg-clinical-plumSoft border border-clinical-border text-[11px] font-medium text-clinical-secondary transition">
                         <span id="sync-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                         <span id="sync-status-text" class="hidden md:inline">Sincronizado en la nube</span>
-                    </div>
+                    </button>
 
                     <button onclick="openPatientModal()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold">
                         <svg class="w-3.5 h-3.5 text-clinical-plum" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
@@ -363,6 +378,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                         </svg>
                         <span>Agendar turno</span>
+                    </button>
+
+                    <button onclick="switchTab('ajustes')" title="Configuración" class="lg:hidden p-1.5 rounded-lg border border-clinical-border text-clinical-secondary hover:text-clinical-ink">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
                     </button>
 
                     <button onclick="handleLogout()" title="Cerrar sesión" class="lg:hidden p-1.5 rounded-lg border border-clinical-border text-clinical-secondary hover:text-clinical-overdueText">
@@ -529,6 +551,12 @@
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                        <button onclick="switchTab('ajustes')" class="px-3.5 py-2 rounded-xl btn-secondary text-xs font-semibold flex items-center gap-2">
+                            <svg class="w-4 h-4 text-clinical-plum" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>Configurar mis horarios</span>
+                        </button>
                         <button onclick="copyWeeklyFreeSlotsToClipboard()" class="px-3.5 py-2 rounded-xl btn-secondary text-xs font-semibold flex items-center gap-2">
                             <svg class="w-4 h-4 text-clinical-secondary" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/>
@@ -705,8 +733,8 @@
                     <!-- Parámetros Profesionales -->
                     <div class="surface-card rounded-xl p-6 space-y-5">
                         <div class="border-b border-clinical-border pb-4">
-                            <h3 class="text-base font-semibold text-clinical-ink">Parámetros del consultorio</h3>
-                            <p class="text-xs text-clinical-secondary mt-0.5">Datos de firma profesional, arancel de referencia y cuenta bancaria</p>
+                            <h3 class="text-base font-semibold text-clinical-ink">Parámetros del consultorio y horarios</h3>
+                            <p class="text-xs text-clinical-secondary mt-0.5">Datos de firma profesional, horarios de atención y cuenta bancaria</p>
                         </div>
 
                         <form onsubmit="saveSettings(event)" class="space-y-4">
@@ -734,27 +762,31 @@
                                 <div>
                                     <label class="block text-xs font-medium text-clinical-ink mb-1.5">Apertura agenda</label>
                                     <select id="set-start-hour" class="w-full px-3 py-2 rounded-xl text-sm input-clinical font-mono-num">
+                                        <option value="7">07:00 hs</option>
                                         <option value="8">08:00 hs</option>
                                         <option value="9">09:00 hs</option>
                                         <option value="10">10:00 hs</option>
                                         <option value="11">11:00 hs</option>
+                                        <option value="12">12:00 hs</option>
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-clinical-ink mb-1.5">Cierre agenda</label>
                                     <select id="set-end-hour" class="w-full px-3 py-2 rounded-xl text-sm input-clinical font-mono-num">
+                                        <option value="16">16:00 hs</option>
                                         <option value="17">17:00 hs</option>
                                         <option value="18">18:00 hs</option>
                                         <option value="19">19:00 hs</option>
                                         <option value="20">20:00 hs</option>
                                         <option value="21">21:00 hs</option>
+                                        <option value="22">22:00 hs</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div class="pt-2">
                                 <button type="submit" class="w-full py-2.5 rounded-xl btn-primary text-xs font-semibold">
-                                    Guardar configuración
+                                    Guardar configuración en mi cuenta
                                 </button>
                             </div>
                         </form>
@@ -763,9 +795,14 @@
                     <!-- Sincronización Cloud y Respaldo -->
                     <div class="surface-card rounded-xl p-6 flex flex-col justify-between space-y-5">
                         <div class="space-y-4">
-                            <div class="border-b border-clinical-border pb-4">
-                                <h3 class="text-base font-semibold text-clinical-ink">Sincronización en la nube y portabilidad</h3>
-                                <p class="text-xs text-clinical-secondary mt-0.5">Estado de tu cuenta profesional y exportación de respaldo local</p>
+                            <div class="border-b border-clinical-border pb-4 flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-base font-semibold text-clinical-ink">Sincronización en la nube y portabilidad</h3>
+                                    <p class="text-xs text-clinical-secondary mt-0.5">Estado de tu cuenta profesional en Firebase y respaldo</p>
+                                </div>
+                                <button type="button" onclick="forceCloudSyncNow()" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold text-clinical-plum">
+                                    Sincronizar ahora
+                                </button>
                             </div>
 
                             <div class="p-4 rounded-xl bg-clinical-subtle/70 border border-clinical-border space-y-2">
@@ -774,7 +811,7 @@
                                     <span id="settings-account-badge" class="font-mono-num text-xs px-2.5 py-0.5 rounded-md bg-clinical-plumSoft text-clinical-plum">laura.kocher</span>
                                 </div>
                                 <p class="text-xs text-clinical-secondary leading-relaxed">
-                                    Todos los cambios realizados en pacientes, agenda y cobros se sincronizan automáticamente en tiempo real con tu cuenta en la nube. Podés iniciar sesión con tus mismas credenciales desde tu celular o computadora.
+                                    Todos tus pacientes, horarios configurados, sesiones y cobros quedan guardados dentro de tu cuenta en Firebase (<span class="font-mono-num">consultorio-laura</span>). Al iniciar sesión con este mismo usuario desde cualquier celular o computadora se cargan automáticamente.
                                 </p>
                             </div>
 
@@ -935,6 +972,7 @@
                     <div>
                         <label class="block text-xs font-medium text-clinical-ink mb-1">Horario</label>
                         <select id="appt-time" required class="w-full px-3 py-2 rounded-xl text-xs input-clinical font-mono-num">
+                            <option value="07:00">07:00</option>
                             <option value="08:00">08:00</option>
                             <option value="09:00">09:00</option>
                             <option value="10:00">10:00</option>
@@ -949,6 +987,7 @@
                             <option value="19:00">19:00</option>
                             <option value="20:00">20:00</option>
                             <option value="21:00">21:00</option>
+                            <option value="22:00">22:00</option>
                         </select>
                     </div>
                     <div>
@@ -1292,7 +1331,7 @@
                 startHour: 9,
                 endHour: 20
             },
-            // Inicia 100% vacío para cada cuenta nueva
+            // Inicia 100% vacío para cuentas nuevas
             patients: [],
             appointments: [],
             blockedSlots: []
@@ -1301,38 +1340,46 @@
         let pendingSlotSelection = { date: null, time: null };
         let isCreatingInlinePatient = false;
 
-        // --- 2. INICIALIZACIÓN DE FIREBASE CON REGLAS ESTRICTAS ---
+        // --- 2. INICIALIZACIÓN DIRECTA DE FIREBASE (SIN BLOQUEO POR AUTH ANÓNIMO) ---
         async function initCloudConnection() {
             const readyLabel = document.getElementById('auth-cloud-ready');
             try {
                 const firebaseConfig = {
-                    apiKey: "AIzaSyCjYrrXhcIf_3r7ToNyKhoAOZXMk4XNmmw",
+                    apiKey: "AIzaSyCjYrrXHcIf_3r7ToNyKhoAOZXMk4XNmmw",
                     authDomain: "consultorio-laura.firebaseapp.com",
                     projectId: "consultorio-laura",
                     storageBucket: "consultorio-laura.firebasestorage.app",
                     messagingSenderId: "933368329440",
                     appId: "1:933368329440:web:9548c31df444a563bfcc85"
                 };
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
 
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (readyLabel) readyLabel.textContent = 'Nube activa';
+
+                // Intentar inicio de sesión anónimo sin abortar si no está habilitado en consola
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (authErr) {
+                    console.warn('Auth anónimo no requerido si las reglas de Firestore están abiertas:', authErr);
                 }
 
                 onAuthStateChanged(auth, (user) => {
                     firebaseUser = user;
-                    if (readyLabel) readyLabel.textContent = user ? 'Nube activa' : 'Modo local';
+                    if (readyLabel) readyLabel.textContent = 'Nube activa';
                 });
             } catch (err) {
-                console.warn('Fallback a persistencia local segura:', err);
-                if (readyLabel) readyLabel.textContent = 'Almacenamiento local activo';
+                console.error('Error inicializando Firebase:', err);
+                if (readyLabel) readyLabel.textContent = 'Modo local';
             }
 
-            // Verificar si ya había una sesión profesional iniciada
+            // Verificar si ya había una sesión profesional iniciada en este navegador
             const savedSession = localStorage.getItem(SESSION_KEY);
             if (savedSession) {
                 try {
@@ -1343,6 +1390,43 @@
                 } catch (e) {
                     console.error(e);
                 }
+            }
+        }
+
+        // Referencias de documento en Firestore (colección directa + respaldo compatible)
+        function getPrimaryWorkspaceRef(accountKey) {
+            return doc(db, 'clinical_workspaces', accountKey);
+        }
+
+        function getLegacyWorkspaceRef(accountKey) {
+            return doc(db, 'artifacts', appId, 'public', 'data', 'clinical_workspaces', accountKey);
+        }
+
+        async function fetchWorkspaceFromCloud(accountKey) {
+            if (!db || !accountKey) return null;
+            try {
+                const primaryRef = getPrimaryWorkspaceRef(accountKey);
+                const primarySnap = await getDoc(primaryRef);
+                document.getElementById('cloud-permission-banner').classList.add('hidden');
+                if (primarySnap.exists()) {
+                    return primarySnap.data();
+                }
+
+                // Verificar si había datos en la ruta anterior y migrarlos
+                const legacyRef = getLegacyWorkspaceRef(accountKey);
+                const legacySnap = await getDoc(legacyRef);
+                if (legacySnap.exists()) {
+                    const legacyData = legacySnap.data();
+                    await setDoc(primaryRef, legacyData, { merge: true });
+                    return legacyData;
+                }
+                return null;
+            } catch (err) {
+                console.error('Error leyendo desde Firestore:', err);
+                if (err && (err.code === 'permission-denied' || String(err.message || '').includes('Missing or insufficient permissions'))) {
+                    document.getElementById('cloud-permission-banner').classList.remove('hidden');
+                }
+                throw err;
             }
         }
 
@@ -1427,26 +1511,48 @@
             const passHash = simpleHash(rawPass);
             const submitBtn = document.getElementById('auth-submit-btn');
             submitBtn.disabled = true;
+            document.getElementById('auth-error-box').classList.add('hidden');
 
             try {
                 let remoteData = null;
-                if (db && firebaseUser) {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'clinical_workspaces', accountKey);
-                    const snap = await getDoc(docRef);
-                    if (snap.exists()) {
-                        remoteData = snap.data();
+
+                if (db) {
+                    try {
+                        remoteData = await fetchWorkspaceFromCloud(accountKey);
+                    } catch (cloudErr) {
+                        if (cloudErr && (cloudErr.code === 'permission-denied' || String(cloudErr.message || '').includes('Missing or insufficient permissions'))) {
+                            showAuthError('Permiso denegado en Firebase: verificá en Firebase Console > Firestore > Reglas que diga allow read, write: if true; y tocá Publicar (o activá Acceso Anónimo en Authentication).');
+                            submitBtn.disabled = false;
+                            return;
+                        }
                     }
-                } else {
+                }
+
+                // Si no se encontró en la nube pero existe copia local en este navegador, usarla para sincronizarla
+                if (!remoteData) {
                     const localRaw = localStorage.getItem(LOCAL_MIRROR_PREFIX + accountKey);
-                    if (localRaw) remoteData = JSON.parse(localRaw);
+                    if (localRaw) {
+                        try {
+                            remoteData = JSON.parse(localRaw);
+                        } catch (parseErr) {}
+                    }
                 }
 
                 if (authMode === 'register') {
                     if (remoteData && remoteData.passwordHash && remoteData.passwordHash !== passHash) {
-                        showAuthError('Ese usuario ya está registrado. Iniciá sesión con tu contraseña.');
+                        showAuthError('Ese usuario ya está registrado. Cambiá a "Iniciar sesión" e ingresá tu contraseña.');
                         submitBtn.disabled = false;
                         return;
                     }
+
+                    // Si la cuenta ya existía en la nube con la misma contraseña, conservar sus datos sin pisarlos
+                    if (remoteData && (Array.isArray(remoteData.patients) || Array.isArray(remoteData.appointments))) {
+                        applyWorkspaceData(remoteData, accountKey, rawUser, passHash);
+                        await saveStateToCloudAndLocal();
+                        completeLoginTransition();
+                        return;
+                    }
+
                     const psychName = document.getElementById('auth-psych-name').value.trim() || 'Lic. Laura Kocher';
                     const alias = document.getElementById('auth-alias').value.trim() || 'laura.kocher.mp';
 
@@ -1461,7 +1567,6 @@
                         startHour: 9,
                         endHour: 20
                     };
-                    // 100% vacío de fábrica
                     appState.patients = [];
                     appState.appointments = [];
                     appState.blockedSlots = [];
@@ -1469,7 +1574,7 @@
                     await saveStateToCloudAndLocal();
                     completeLoginTransition();
                 } else {
-                    // Modo Login
+                    // Modo Login: cargar siempre lo que está guardado en la cuenta en la nube
                     if (remoteData) {
                         if (remoteData.passwordHash && remoteData.passwordHash !== passHash) {
                             showAuthError('Contraseña incorrecta para esta cuenta profesional.');
@@ -1477,9 +1582,10 @@
                             return;
                         }
                         applyWorkspaceData(remoteData, accountKey, rawUser, passHash);
+                        await saveStateToCloudAndLocal();
                         completeLoginTransition();
                     } else {
-                        // Si la cuenta aún no existe en la nube, la inicializa limpia con esas credenciales
+                        // Si la cuenta aún no existe en Firestore, la crea por primera vez en la nube
                         appState.accountKey = accountKey;
                         appState.username = rawUser;
                         appState.passwordHash = passHash;
@@ -1492,7 +1598,7 @@
                 }
             } catch (err) {
                 console.error('Error en autenticación:', err);
-                showAuthError('No se pudo verificar la cuenta. Reintentá en unos segundos.');
+                showAuthError('No se pudo verificar la cuenta. Revisá tu conexión e intentá nuevamente.');
             } finally {
                 submitBtn.disabled = false;
             }
@@ -1503,12 +1609,30 @@
             appState.username = username;
             appState.passwordHash = passwordHash;
 
-            // Cargar espejo local inmediato para latencia cero
+            // 1. Cargar espejo local inmediato para apertura rápida
             const localRaw = localStorage.getItem(LOCAL_MIRROR_PREFIX + accountKey);
+            let localData = null;
             if (localRaw) {
                 try {
-                    applyWorkspaceData(JSON.parse(localRaw), accountKey, username, passwordHash);
+                    localData = JSON.parse(localRaw);
+                    applyWorkspaceData(localData, accountKey, username, passwordHash);
                 } catch (e) {}
+            }
+
+            // 2. Traer siempre los datos más recientes desde Cloud Firestore al abrir la página en cualquier dispositivo
+            if (db) {
+                try {
+                    const cloudData = await fetchWorkspaceFromCloud(accountKey);
+                    if (cloudData) {
+                        applyWorkspaceData(cloudData, accountKey, username, passwordHash);
+                        localStorage.setItem(LOCAL_MIRROR_PREFIX + accountKey, JSON.stringify(cloudData));
+                    } else if (localData) {
+                        // Si este dispositivo tenía datos locales que aún no estaban en la nube, subirlos ahora
+                        await saveStateToCloudAndLocal();
+                    }
+                } catch (err) {
+                    console.warn('No se pudo actualizar al iniciar desde la nube:', err);
+                }
             }
 
             completeLoginTransition();
@@ -1538,7 +1662,7 @@
             document.getElementById('settings-account-badge').textContent = appState.username;
 
             subscribeToRealtimeWorkspace(appState.accountKey);
-            switchTab('agenda');
+            switchTab(appState.currentTab || 'agenda');
         }
 
         function subscribeToRealtimeWorkspace(accountKey) {
@@ -1546,15 +1670,16 @@
                 unsubscribeWorkspace();
                 unsubscribeWorkspace = null;
             }
-            if (!db || !firebaseUser || !accountKey) {
+            if (!db || !accountKey) {
                 setSyncIndicator('local', 'Guardado en dispositivo');
                 return;
             }
 
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'clinical_workspaces', accountKey);
+            const docRef = getPrimaryWorkspaceRef(accountKey);
             unsubscribeWorkspace = onSnapshot(
                 docRef,
                 (snapshot) => {
+                    document.getElementById('cloud-permission-banner').classList.add('hidden');
                     if (snapshot.exists()) {
                         const data = snapshot.data();
                         isApplyingRemoteUpdate = true;
@@ -1567,7 +1692,10 @@
                 },
                 (err) => {
                     console.warn('Error en suscripción Firestore:', err);
-                    setSyncIndicator('local', 'Guardado local activo');
+                    if (err && (err.code === 'permission-denied' || String(err.message || '').includes('Missing or insufficient permissions'))) {
+                        document.getElementById('cloud-permission-banner').classList.remove('hidden');
+                    }
+                    setSyncIndicator('local', 'Guardado en dispositivo');
                 }
             );
         }
@@ -1593,21 +1721,53 @@
                 console.error(e);
             }
 
-            // 2. Guardado en Cloud Firestore
-            if (db && firebaseUser) {
+            // 2. Guardado directo en Cloud Firestore (sin depender de firebaseUser)
+            if (db) {
                 try {
                     setSyncIndicator('saving', 'Sincronizando...');
-                    const pubDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'clinical_workspaces', appState.accountKey);
-                    await setDoc(pubDocRef, payload, { merge: true });
+                    const primaryRef = getPrimaryWorkspaceRef(appState.accountKey);
+                    await setDoc(primaryRef, payload, { merge: true });
+                    document.getElementById('cloud-permission-banner').classList.add('hidden');
                     setSyncIndicator('synced', 'Sincronizado en la nube');
                 } catch (err) {
                     console.error('Error guardando en Firestore:', err);
+                    if (err && (err.code === 'permission-denied' || String(err.message || '').includes('Missing or insufficient permissions'))) {
+                        document.getElementById('cloud-permission-banner').classList.remove('hidden');
+                    }
                     setSyncIndicator('local', 'Guardado en dispositivo');
                 }
             } else {
                 setSyncIndicator('local', 'Guardado en dispositivo');
             }
         }
+
+        window.forceCloudSyncNow = async function() {
+            if (!appState.accountKey || !db) {
+                showToast('Iniciá sesión para sincronizar con la nube');
+                return;
+            }
+            try {
+                setSyncIndicator('saving', 'Sincronizando...');
+                const cloudData = await fetchWorkspaceFromCloud(appState.accountKey);
+                if (cloudData) {
+                    const localCount = appState.patients.length + appState.appointments.length + appState.blockedSlots.length;
+                    const cloudCount = (cloudData.patients?.length || 0) + (cloudData.appointments?.length || 0) + (cloudData.blockedSlots?.length || 0);
+                    if (cloudCount >= localCount) {
+                        applyWorkspaceData(cloudData, appState.accountKey, appState.username, appState.passwordHash);
+                        localStorage.setItem(LOCAL_MIRROR_PREFIX + appState.accountKey, JSON.stringify(cloudData));
+                        refreshAllUI();
+                    } else {
+                        await saveStateToCloudAndLocal();
+                    }
+                } else {
+                    await saveStateToCloudAndLocal();
+                }
+                setSyncIndicator('synced', 'Sincronizado en la nube');
+                showToast('Cuenta sincronizada con la nube');
+            } catch (e) {
+                showToast('Verificá las reglas de Firestore en tu consola de Firebase');
+            }
+        };
 
         window.handleLogout = function() {
             if (unsubscribeWorkspace) {
@@ -1710,7 +1870,7 @@
                 disponibilidad: ['Disponibilidad horaria', 'Gestión de turnos libres y bloqueos de agenda semanal'],
                 finanzas: ['Honorarios y cobros', 'Control de cuentas por cobrar, vencimientos e historial de transacciones'],
                 pacientes: ['Directorio de pacientes', 'Fichas de pacientes activos, aranceles e historial administrativo'],
-                ajustes: ['Configuración del consultorio', 'Parámetros profesionales, datos bancarios y copias de respaldo']
+                ajustes: ['Configuración del consultorio', 'Parámetros profesionales, horarios de atención y copias de respaldo']
             };
 
             document.getElementById('header-title').textContent = headerMeta[tabName][0];
