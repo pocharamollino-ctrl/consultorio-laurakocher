@@ -1,0 +1,3124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lic. Laura Kocher | Gestión de Consultorio y Honorarios</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        clinical: {
+                            bg: '#FAF8FA',
+                            surface: '#FFFFFF',
+                            subtle: '#F4EFF6',
+                            border: '#EBE4EC',
+                            borderStrong: '#DCD0DF',
+                            plum: '#6E4B7A',
+                            plumHover: '#593B63',
+                            plumSoft: '#F1ECF4',
+                            rose: '#D48C9E',
+                            roseSoft: '#F9EEF1',
+                            roseText: '#8C4658',
+                            ink: '#231B26',
+                            secondary: '#6E6273',
+                            muted: '#9C8FA1',
+                            paidBg: '#EBF5F0',
+                            paidText: '#28664B',
+                            pendingBg: '#FDF6E9',
+                            pendingText: '#94621B',
+                            overdueBg: '#FDECEC',
+                            overdueText: '#A63232'
+                        }
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(35, 27, 38, 0.03), 0 1px 2px -1px rgba(35, 27, 38, 0.03)',
+                        'elevated': '0 10px 30px -5px rgba(35, 27, 38, 0.07), 0 4px 12px -2px rgba(35, 27, 38, 0.04)',
+                        'modal': '0 20px 45px -10px rgba(35, 27, 38, 0.16)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FAF8FA;
+            color: #231B26;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-mono-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-feature-settings: "tnum" on, "lnum" on;
+        }
+        .surface-card {
+            background-color: #FFFFFF;
+            border: 1px solid #EBE4EC;
+            box-shadow: 0 1px 3px 0 rgba(35, 27, 38, 0.03);
+        }
+        .btn-primary {
+            background-color: #6E4B7A;
+            color: #FFFFFF;
+            transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+        }
+        .btn-primary:hover {
+            background-color: #593B63;
+        }
+        .btn-primary:active {
+            transform: translateY(0.5px);
+        }
+        .btn-secondary {
+            background-color: #FFFFFF;
+            color: #231B26;
+            border: 1px solid #DCD0DF;
+            transition: all 0.15s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #F4EFF6;
+            border-color: #C7B6CC;
+        }
+        .btn-rose-soft {
+            background-color: #F9EEF1;
+            color: #8C4658;
+            border: 1px solid #EED6DC;
+            transition: all 0.15s ease;
+        }
+        .btn-rose-soft:hover {
+            background-color: #F3E0E6;
+        }
+        .input-clinical {
+            background-color: #FFFFFF;
+            border: 1px solid #DCD0DF;
+            color: #231B26;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .input-clinical:focus {
+            outline: none;
+            border-color: #6E4B7A;
+            box-shadow: 0 0 0 3px rgba(110, 75, 122, 0.12);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FAF8FA;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #DCD0DF;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B9A6BF;
+        }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-view {
+            animation: fadeSlide 0.18s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col lg:flex-row bg-clinical-bg text-clinical-ink pb-20 lg:pb-0">
+
+    <!-- ========================================================================= -->
+    <!-- ================ PANTALLA DE ACCESO PROFESIONAL (LOGIN) ================= -->
+    <!-- ========================================================================= -->
+    <div id="auth-screen" class="fixed inset-0 z-50 bg-clinical-bg flex flex-col justify-center items-center p-4 sm:p-6">
+        <div class="w-full max-w-md surface-card rounded-2xl p-6 sm:p-8 shadow-elevated space-y-6">
+            <!-- Brand Header -->
+            <div class="flex items-start justify-between border-b border-clinical-border pb-5">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-xl bg-clinical-plum text-white flex items-center justify-center font-semibold text-sm tracking-wider shrink-0">
+                        LK
+                    </div>
+                    <div>
+                        <h1 class="text-base font-semibold text-clinical-ink tracking-tight">Lic. Laura Kocher</h1>
+                        <p class="text-xs text-clinical-secondary">Psicología Clínica · Gestión de Consultorio</p>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-clinical-plumSoft text-clinical-plum">
+                    <span class="w-1.5 h-1.5 rounded-full bg-clinical-plum"></span>
+                    Cloud Sync
+                </span>
+            </div>
+
+            <!-- Mode Selector Tabs -->
+            <div class="grid grid-cols-2 p-1 bg-clinical-subtle rounded-xl border border-clinical-border">
+                <button type="button" id="tab-auth-login" onclick="setAuthMode('login')" class="py-2 text-xs font-semibold rounded-lg transition-all bg-white text-clinical-ink shadow-card">
+                    Iniciar sesión
+                </button>
+                <button type="button" id="tab-auth-register" onclick="setAuthMode('register')" class="py-2 text-xs font-semibold rounded-lg transition-all text-clinical-secondary hover:text-clinical-ink">
+                    Crear cuenta profesional
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-clinical-ink mb-1.5">Usuario o correo profesional</label>
+                    <input type="text" id="auth-username" required autocomplete="username" placeholder="laura.kocher" class="w-full px-3.5 py-2.5 rounded-xl text-sm input-clinical">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-clinical-ink mb-1.5">Contraseña de acceso</label>
+                    <input type="password" id="auth-password" required autocomplete="current-password" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl text-sm input-clinical">
+                </div>
+
+                <div id="auth-register-fields" class="hidden space-y-4 pt-1 border-t border-clinical-border">
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1.5">Firma profesional (para notificaciones)</label>
+                        <input type="text" id="auth-psych-name" value="Lic. Laura Kocher" class="w-full px-3.5 py-2.5 rounded-xl text-sm input-clinical">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1.5">Alias / CBU predeterminado</label>
+                        <input type="text" id="auth-alias" placeholder="laura.kocher.mp" class="w-full px-3.5 py-2.5 rounded-xl text-sm input-clinical font-mono-num">
+                    </div>
+                </div>
+
+                <div id="auth-error-box" class="hidden p-3 rounded-xl bg-clinical-overdueBg border border-red-200 text-xs text-clinical-overdueText font-medium"></div>
+
+                <button type="submit" id="auth-submit-btn" class="w-full py-2.5 px-4 rounded-xl btn-primary text-sm font-semibold flex items-center justify-center gap-2">
+                    <span id="auth-submit-text">Ingresar al consultorio</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+                    </svg>
+                </button>
+            </form>
+
+            <!-- Info Footer -->
+            <div class="pt-3 border-t border-clinical-border flex items-center justify-between text-[11px] text-clinical-muted">
+                <span>Sincronización encriptada multi-dispositivo</span>
+                <span id="auth-cloud-ready" class="font-mono-num text-clinical-secondary">Conectando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- ======================== BARRA LATERAL (DESKTOP) ======================== -->
+    <!-- ========================================================================= -->
+    <aside class="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 bg-white border-r border-clinical-border z-30 select-none">
+        <!-- Brand Identity -->
+        <div class="px-5 py-5 border-b border-clinical-border flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-clinical-plum text-white flex items-center justify-center font-semibold text-xs tracking-wider shrink-0">
+                LK
+            </div>
+            <div class="min-w-0">
+                <p id="sidebar-brand-name" class="text-sm font-semibold text-clinical-ink truncate">Lic. Laura Kocher</p>
+                <p class="text-[11px] text-clinical-secondary truncate">Psicología Clínica</p>
+            </div>
+        </div>
+
+        <!-- Primary Action -->
+        <div class="p-4">
+            <button onclick="openAppointmentModal()" class="w-full py-2.5 px-3.5 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-2 shadow-card">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                </svg>
+                <span>Agendar turno</span>
+            </button>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="flex-1 px-3 space-y-1 overflow-y-auto">
+            <p class="px-3 pt-2 pb-1.5 text-[10px] font-semibold uppercase tracking-wider text-clinical-muted">Operaciones</p>
+
+            <button onclick="switchTab('agenda')" id="nav-desktop-agenda" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                    </svg>
+                    <span>Agenda de turnos</span>
+                </div>
+                <span id="badge-desktop-today" class="font-mono-num text-[11px] px-2 py-0.5 rounded-md bg-clinical-subtle text-clinical-secondary">0</span>
+            </button>
+
+            <button onclick="switchTab('disponibilidad')" id="nav-desktop-disponibilidad" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Disponibilidad</span>
+                </div>
+                <span id="badge-desktop-free" class="font-mono-num text-[11px] px-2 py-0.5 rounded-md bg-clinical-subtle text-clinical-secondary">0h</span>
+            </button>
+
+            <button onclick="switchTab('finanzas')" id="nav-desktop-finanzas" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/>
+                    </svg>
+                    <span>Honorarios y cobros</span>
+                </div>
+                <span id="badge-desktop-unpaid" class="font-mono-num text-[11px] px-2 py-0.5 rounded-md bg-clinical-roseSoft text-clinical-roseText">0</span>
+            </button>
+
+            <button onclick="switchTab('pacientes')" id="nav-desktop-pacientes" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+                    </svg>
+                    <span>Pacientes</span>
+                </div>
+                <span id="badge-desktop-patients" class="font-mono-num text-[11px] px-2 py-0.5 rounded-md bg-clinical-subtle text-clinical-secondary">0</span>
+            </button>
+
+            <button onclick="switchTab('ajustes')" id="nav-desktop-ajustes" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all">
+                <div class="flex items-center gap-2.5">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Configuración</span>
+                </div>
+            </button>
+
+            <!-- Quick Availability Action Box -->
+            <div class="pt-5">
+                <div class="p-3.5 rounded-xl bg-clinical-subtle/70 border border-clinical-border space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] font-semibold text-clinical-ink">Horarios disponibles</span>
+                        <span class="w-2 h-2 rounded-full bg-clinical-rose"></span>
+                    </div>
+                    <p class="text-[11px] text-clinical-secondary leading-relaxed">
+                        Generá el resumen semanal de turnos libres para enviar por WhatsApp.
+                    </p>
+                    <button onclick="openShareAvailabilityModal()" class="w-full py-2 px-3 rounded-lg btn-secondary text-xs font-semibold flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-clinical-plum" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"/>
+                        </svg>
+                        <span>Compartir horarios</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar Footer: User & Bank Info -->
+        <div class="p-4 border-t border-clinical-border bg-clinical-bg/50 space-y-2.5">
+            <div class="flex items-center justify-between">
+                <div class="min-w-0">
+                    <p id="sidebar-user-label" class="text-xs font-semibold text-clinical-ink truncate">laura.kocher</p>
+                    <p id="sidebar-alias-label" class="font-mono-num text-[11px] text-clinical-secondary truncate">Alias: laura.kocher.mp</p>
+                </div>
+                <button onclick="handleLogout()" title="Cerrar sesión" class="p-1.5 rounded-lg text-clinical-secondary hover:text-clinical-overdueText hover:bg-clinical-overdueBg transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================================================= -->
+    <!-- ======================== CONTENEDOR PRINCIPAL =========================== -->
+    <!-- ========================================================================= -->
+    <div class="flex-1 lg:pl-64 flex flex-col min-h-screen">
+
+        <!-- Sticky Top Header -->
+        <header class="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-clinical-border px-4 sm:px-6 lg:px-8 py-3.5">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="lg:hidden w-8 h-8 rounded-lg bg-clinical-plum text-white flex items-center justify-center font-semibold text-xs shrink-0">
+                        LK
+                    </div>
+                    <div class="min-w-0">
+                        <h1 id="header-title" class="text-base sm:text-lg font-semibold text-clinical-ink tracking-tight truncate">Agenda de turnos</h1>
+                        <p id="header-subtitle" class="text-xs text-clinical-secondary hidden sm:block">Organización de sesiones, estado clínico y liquidación de honorarios</p>
+                    </div>
+                </div>
+
+                <!-- Right Header Status & Actions -->
+                <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                    <!-- Cloud Sync Status Pill -->
+                    <div id="sync-status-pill" class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-clinical-subtle border border-clinical-border text-[11px] font-medium text-clinical-secondary">
+                        <span id="sync-status-dot" class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                        <span id="sync-status-text" class="hidden md:inline">Sincronizado en la nube</span>
+                    </div>
+
+                    <button onclick="openPatientModal()" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold">
+                        <svg class="w-3.5 h-3.5 text-clinical-plum" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/>
+                        </svg>
+                        <span>Nuevo paciente</span>
+                    </button>
+
+                    <button onclick="openAppointmentModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg btn-primary text-xs font-semibold">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                        </svg>
+                        <span>Agendar turno</span>
+                    </button>
+
+                    <button onclick="handleLogout()" title="Cerrar sesión" class="lg:hidden p-1.5 rounded-lg border border-clinical-border text-clinical-secondary hover:text-clinical-overdueText">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+            <!-- ======================== 4 KPI METRIC CARDS ======================== -->
+            <section class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+                <!-- KPI 1: Sesiones de Hoy -->
+                <div onclick="switchTab('agenda'); setAgendaQuickFilter('today');" class="cursor-pointer surface-card p-4 rounded-xl hover:border-clinical-borderStrong transition">
+                    <div class="flex items-center justify-between text-clinical-secondary mb-2">
+                        <span class="text-xs font-medium">Sesiones de hoy</span>
+                        <svg class="w-4 h-4 text-clinical-plum" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                        </svg>
+                    </div>
+                    <p id="kpi-today-count" class="font-mono-num text-xl sm:text-2xl font-semibold text-clinical-ink">0</p>
+                    <p id="kpi-today-sub" class="text-[11px] text-clinical-muted mt-1">Agenda del día</p>
+                </div>
+
+                <!-- KPI 2: Saldo pendiente por cobrar -->
+                <div onclick="switchTab('finanzas')" class="cursor-pointer surface-card p-4 rounded-xl hover:border-clinical-borderStrong transition">
+                    <div class="flex items-center justify-between text-clinical-secondary mb-2">
+                        <span class="text-xs font-medium">Pendiente de cobro</span>
+                        <span class="w-2 h-2 rounded-full bg-clinical-rose"></span>
+                    </div>
+                    <p id="kpi-pending-amount" class="font-mono-num text-xl sm:text-2xl font-semibold text-clinical-ink">$0</p>
+                    <p id="kpi-pending-count" class="text-[11px] text-clinical-secondary mt-1">0 sesiones pendientes</p>
+                </div>
+
+                <!-- KPI 3: Ingresos del mes -->
+                <div onclick="switchTab('finanzas')" class="cursor-pointer surface-card p-4 rounded-xl hover:border-clinical-borderStrong transition">
+                    <div class="flex items-center justify-between text-clinical-secondary mb-2">
+                        <span class="text-xs font-medium">Acreditado este mes</span>
+                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                    </div>
+                    <p id="kpi-month-paid" class="font-mono-num text-xl sm:text-2xl font-semibold text-clinical-plum">$0</p>
+                    <p id="kpi-paid-count" class="text-[11px] text-clinical-muted mt-1">0 pagos confirmados</p>
+                </div>
+
+                <!-- KPI 4: Disponibilidad semanal -->
+                <div onclick="switchTab('disponibilidad')" class="cursor-pointer surface-card p-4 rounded-xl hover:border-clinical-borderStrong transition">
+                    <div class="flex items-center justify-between text-clinical-secondary mb-2">
+                        <span class="text-xs font-medium">Turnos libres (semana)</span>
+                        <svg class="w-4 h-4 text-clinical-secondary" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <p id="kpi-free-slots" class="font-mono-num text-xl sm:text-2xl font-semibold text-clinical-ink">0</p>
+                    <p class="text-[11px] text-clinical-plum font-medium mt-1">Ver grilla horaria</p>
+                </div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- ==================== VISTA 1: AGENDA DE TURNOS ==================== -->
+            <!-- =================================================================== -->
+            <section id="view-agenda" class="space-y-5 animate-view">
+                <!-- Week Navigation & Filter Bar -->
+                <div class="surface-card rounded-xl p-4 space-y-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div class="flex items-center gap-2">
+                            <button onclick="changeWeekOffset(-1)" class="p-2 rounded-lg btn-secondary text-clinical-secondary hover:text-clinical-ink" title="Semana anterior">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                                </svg>
+                            </button>
+                            <h2 id="agenda-week-label" class="font-mono-num text-xs sm:text-sm font-semibold text-clinical-ink px-1">Semana</h2>
+                            <button onclick="changeWeekOffset(1)" class="p-2 rounded-lg btn-secondary text-clinical-secondary hover:text-clinical-ink" title="Semana siguiente">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                                </svg>
+                            </button>
+                            <button onclick="resetToCurrentWeek()" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-clinical-plumSoft text-clinical-plum hover:bg-purple-100 transition">
+                                Hoy
+                            </button>
+                        </div>
+
+                        <!-- Filter Pills -->
+                        <div class="flex flex-wrap items-center gap-1 bg-clinical-subtle p-1 rounded-xl border border-clinical-border">
+                            <button onclick="setAgendaQuickFilter('day')" id="filter-btn-day" class="px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                Día seleccionado
+                            </button>
+                            <button onclick="setAgendaQuickFilter('today')" id="filter-btn-today" class="px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                Hoy
+                            </button>
+                            <button onclick="setAgendaQuickFilter('upcoming')" id="filter-btn-upcoming" class="px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                Próximos
+                            </button>
+                            <button onclick="setAgendaQuickFilter('unpaid')" id="filter-btn-unpaid" class="px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                Con saldo pendiente
+                            </button>
+                            <button onclick="setAgendaQuickFilter('all')" id="filter-btn-all" class="px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                                Todos
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 6-Day Week Strip (Lunes a Sábado) -->
+                    <div id="agenda-week-strip" class="grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
+                </div>
+
+                <!-- Main Agenda Split: Left (Appointments) + Right (Free Hours & Receivables) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                    <!-- Left 2 Columns -->
+                    <div class="lg:col-span-2 space-y-3.5">
+                        <div class="surface-card px-4 py-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <h3 id="agenda-list-title" class="text-sm font-semibold text-clinical-ink">Sesiones programadas</h3>
+                                <p class="text-xs text-clinical-secondary">Gestión de asistencia, confirmación por WhatsApp y acreditación de pagos</p>
+                            </div>
+                            <input type="date" id="agenda-date-picker" onchange="onDatePickerChange(this.value)" class="font-mono-num px-3 py-1.5 rounded-lg text-xs input-clinical">
+                        </div>
+
+                        <div id="agenda-appointments-list" class="space-y-3"></div>
+                    </div>
+
+                    <!-- Right 1 Column -->
+                    <div class="space-y-5">
+                        <!-- Quick Free Slots -->
+                        <div class="surface-card rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-semibold uppercase tracking-wider text-clinical-secondary">Horarios disponibles del día</h3>
+                                <button onclick="openShareAvailabilityModal()" class="text-xs font-semibold text-clinical-plum hover:underline">
+                                    Compartir
+                                </button>
+                            </div>
+                            <p class="text-xs text-clinical-muted">Seleccioná un horario libre para asignar un turno en esa franja:</p>
+                            <div id="agenda-quick-free-slots" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+
+                        <!-- Quick Pending Receivables -->
+                        <div class="surface-card rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xs font-semibold uppercase tracking-wider text-clinical-secondary">Cuentas por cobrar</h3>
+                                <button onclick="switchTab('finanzas')" class="text-xs font-semibold text-clinical-plum hover:underline">
+                                    Ver detalle
+                                </button>
+                            </div>
+                            <div id="agenda-quick-unpaid-list" class="space-y-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- ==================== VISTA 2: DISPONIBILIDAD ====================== -->
+            <!-- =================================================================== -->
+            <section id="view-disponibilidad" class="hidden space-y-5 animate-view">
+                <!-- Header Card -->
+                <div class="surface-card rounded-xl p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-gradient-to-r from-white via-clinical-subtle/50 to-clinical-roseSoft/40">
+                    <div class="space-y-1 max-w-2xl">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-clinical-plum">Planificación de capacidad</span>
+                        <h2 class="text-base sm:text-lg font-semibold text-clinical-ink">Grilla semanal de disponibilidad clínica</h2>
+                        <p class="text-xs text-clinical-secondary">
+                            Hacé clic en cualquier horario libre para asignar un turno nuevo o reservar horario de supervisión/personal.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                        <button onclick="copyWeeklyFreeSlotsToClipboard()" class="px-3.5 py-2 rounded-xl btn-secondary text-xs font-semibold flex items-center gap-2">
+                            <svg class="w-4 h-4 text-clinical-secondary" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/>
+                            </svg>
+                            <span>Copiar disponibilidad</span>
+                        </button>
+                        <button onclick="openShareAvailabilityModal()" class="px-4 py-2 rounded-xl btn-primary text-xs font-semibold flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>
+                            </svg>
+                            <span>Enviar horarios por WhatsApp</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Week Controls & Status Legend -->
+                <div class="surface-card rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeWeekOffset(-1)" class="p-2 rounded-lg btn-secondary text-clinical-secondary">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+                            </svg>
+                        </button>
+                        <span id="avail-week-label" class="font-mono-num text-xs sm:text-sm font-semibold text-clinical-ink px-2">Semana</span>
+                        <button onclick="changeWeekOffset(1)" class="p-2 rounded-lg btn-secondary text-clinical-secondary">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+                            </svg>
+                        </button>
+                        <button onclick="resetToCurrentWeek()" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-clinical-plumSoft text-clinical-plum">
+                            Semana actual
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-4 text-xs text-clinical-secondary">
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-clinical-paidBg border border-emerald-300"></span> Disponible
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-clinical-plumSoft border border-purple-300"></span> Turno asignado
+                        </span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-sm bg-clinical-subtle border border-clinical-borderStrong"></span> Bloqueo personal
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 6-Day Grid -->
+                <div id="availability-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5"></div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- ================ VISTA 3: HONORARIOS Y COBROS ===================== -->
+            <!-- =================================================================== -->
+            <section id="view-finanzas" class="hidden space-y-5 animate-view">
+                <!-- Financial KPI Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="surface-card p-5 rounded-xl border-l-4 border-l-red-500">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-clinical-secondary">Pagos vencidos</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-clinical-overdueBg text-clinical-overdueText">Vencido</span>
+                        </div>
+                        <p id="fin-overdue-total" class="font-mono-num text-2xl font-semibold text-clinical-overdueText mt-2">$0</p>
+                        <p id="fin-overdue-sub" class="text-xs text-clinical-muted mt-1">0 sesiones con fecha vencida</p>
+                    </div>
+
+                    <div class="surface-card p-5 rounded-xl border-l-4 border-l-clinical-rose">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-clinical-secondary">Total pendiente por cobrar</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-clinical-pendingBg text-clinical-pendingText">Pendiente</span>
+                        </div>
+                        <p id="fin-pending-total" class="font-mono-num text-2xl font-semibold text-clinical-ink mt-2">$0</p>
+                        <p id="fin-pending-sub" class="text-xs text-clinical-muted mt-1">0 sesiones sin acreditar</p>
+                    </div>
+
+                    <div class="surface-card p-5 rounded-xl border-l-4 border-l-emerald-600">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-clinical-secondary">Total histórico acreditado</span>
+                            <span class="px-2 py-0.5 rounded-full text-[11px] font-medium bg-clinical-paidBg text-clinical-paidText">Cobrado</span>
+                        </div>
+                        <p id="fin-paid-total" class="font-mono-num text-2xl font-semibold text-clinical-paidText mt-2">$0</p>
+                        <p id="fin-paid-sub" class="text-xs text-clinical-muted mt-1">0 transacciones registradas</p>
+                    </div>
+                </div>
+
+                <!-- Configured Bank Details Bar -->
+                <div class="surface-card rounded-xl px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-clinical-subtle/50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-white border border-clinical-border flex items-center justify-center text-clinical-plum shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-[11px] text-clinical-secondary">Datos bancarios incluidos en los recordatorios de honorarios por WhatsApp:</p>
+                            <p id="fin-bank-summary" class="font-mono-num text-xs font-semibold text-clinical-ink">Alias: laura.kocher.mp</p>
+                        </div>
+                    </div>
+                    <button onclick="switchTab('ajustes')" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold shrink-0">
+                        Editar datos bancarios
+                    </button>
+                </div>
+
+                <!-- Split View: Receivables & Transaction Ledger -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                    <!-- Left 7 Cols: Cuentas por Cobrar -->
+                    <div class="lg:col-span-7 surface-card rounded-xl overflow-hidden flex flex-col">
+                        <div class="p-4 sm:px-5 border-b border-clinical-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-sm font-semibold text-clinical-ink">Cuentas por cobrar (Pendientes y Vencidos)</h3>
+                                    <span id="fin-unpaid-badge" class="font-mono-num px-2 py-0.5 rounded-md text-xs font-semibold bg-clinical-roseSoft text-clinical-roseText">0</span>
+                                </div>
+                                <p class="text-xs text-clinical-secondary mt-0.5">Pacientes con saldo abierto y fecha de vencimiento de pago</p>
+                            </div>
+                            <select id="fin-unpaid-filter" onchange="renderFinanzasView()" class="px-3 py-1.5 rounded-lg text-xs font-medium input-clinical">
+                                <option value="all">Todos los pendientes</option>
+                                <option value="overdue">Solo vencidos</option>
+                                <option value="upcoming">En término / por vencer</option>
+                            </select>
+                        </div>
+                        <div id="fin-receivables-list" class="p-4 sm:p-5 space-y-2.5 max-h-[560px] overflow-y-auto"></div>
+                    </div>
+
+                    <!-- Right 5 Cols: Historial de Transacciones -->
+                    <div class="lg:col-span-5 surface-card rounded-xl overflow-hidden flex flex-col">
+                        <div class="p-4 sm:px-5 border-b border-clinical-border space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-clinical-ink">Historial de transacciones</h3>
+                                    <p class="text-xs text-clinical-secondary">Registro cronológico de cobros acreditados</p>
+                                </div>
+                                <span id="fin-paid-badge" class="font-mono-num px-2 py-0.5 rounded-md text-xs font-semibold bg-clinical-paidBg text-clinical-paidText">0</span>
+                            </div>
+                            <div class="relative">
+                                <svg class="w-4 h-4 text-clinical-muted absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                                </svg>
+                                <input type="text" id="fin-history-search" oninput="renderFinanzasView()" placeholder="Filtrar por paciente o medio de pago..." class="w-full pl-9 pr-3 py-1.5 rounded-lg text-xs input-clinical">
+                            </div>
+                        </div>
+                        <div id="fin-history-list" class="p-4 sm:p-5 space-y-2.5 max-h-[500px] overflow-y-auto"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- ================ VISTA 4: DIRECTORIO DE PACIENTES ================= -->
+            <!-- =================================================================== -->
+            <section id="view-pacientes" class="hidden space-y-5 animate-view">
+                <div class="surface-card rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="relative flex-1 max-w-md">
+                        <svg class="w-4 h-4 text-clinical-muted absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                        </svg>
+                        <input type="text" id="patient-search-input" oninput="renderPatientsView()" placeholder="Buscar por nombre, apellido o teléfono..." class="w-full pl-9 pr-4 py-2 rounded-xl text-xs sm:text-sm input-clinical">
+                    </div>
+                    <button onclick="openPatientModal()" class="px-4 py-2 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                        </svg>
+                        <span>Dar de alta paciente</span>
+                    </button>
+                </div>
+
+                <div id="patients-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </section>
+
+            <!-- =================================================================== -->
+            <!-- ================ VISTA 5: CONFIGURACIÓN Y RESPALDO ================ -->
+            <!-- =================================================================== -->
+            <section id="view-ajustes" class="hidden space-y-5 animate-view">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <!-- Parámetros Profesionales -->
+                    <div class="surface-card rounded-xl p-6 space-y-5">
+                        <div class="border-b border-clinical-border pb-4">
+                            <h3 class="text-base font-semibold text-clinical-ink">Parámetros del consultorio</h3>
+                            <p class="text-xs text-clinical-secondary mt-0.5">Datos de firma profesional, arancel de referencia y cuenta bancaria</p>
+                        </div>
+
+                        <form onsubmit="saveSettings(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-clinical-ink mb-1.5">Firma profesional en notificaciones</label>
+                                <input type="text" id="set-psych-name" required class="w-full px-3.5 py-2 rounded-xl text-sm input-clinical">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                <div>
+                                    <label class="block text-xs font-medium text-clinical-ink mb-1.5">Alias / CBU para cobros</label>
+                                    <input type="text" id="set-psych-alias" required class="w-full px-3.5 py-2 rounded-xl text-sm input-clinical font-mono-num">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-clinical-ink mb-1.5">Entidad bancaria / Billetera</label>
+                                    <input type="text" id="set-bank-name" placeholder="Mercado Pago / Banco" class="w-full px-3.5 py-2 rounded-xl text-sm input-clinical">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                                <div>
+                                    <label class="block text-xs font-medium text-clinical-ink mb-1.5">Honorario base ($)</label>
+                                    <input type="number" id="set-default-fee" required min="0" step="500" class="w-full px-3.5 py-2 rounded-xl text-sm input-clinical font-mono-num">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-clinical-ink mb-1.5">Apertura agenda</label>
+                                    <select id="set-start-hour" class="w-full px-3 py-2 rounded-xl text-sm input-clinical font-mono-num">
+                                        <option value="8">08:00 hs</option>
+                                        <option value="9">09:00 hs</option>
+                                        <option value="10">10:00 hs</option>
+                                        <option value="11">11:00 hs</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-clinical-ink mb-1.5">Cierre agenda</label>
+                                    <select id="set-end-hour" class="w-full px-3 py-2 rounded-xl text-sm input-clinical font-mono-num">
+                                        <option value="17">17:00 hs</option>
+                                        <option value="18">18:00 hs</option>
+                                        <option value="19">19:00 hs</option>
+                                        <option value="20">20:00 hs</option>
+                                        <option value="21">21:00 hs</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <button type="submit" class="w-full py-2.5 rounded-xl btn-primary text-xs font-semibold">
+                                    Guardar configuración
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Sincronización Cloud y Respaldo -->
+                    <div class="surface-card rounded-xl p-6 flex flex-col justify-between space-y-5">
+                        <div class="space-y-4">
+                            <div class="border-b border-clinical-border pb-4">
+                                <h3 class="text-base font-semibold text-clinical-ink">Sincronización en la nube y portabilidad</h3>
+                                <p class="text-xs text-clinical-secondary mt-0.5">Estado de tu cuenta profesional y exportación de respaldo local</p>
+                            </div>
+
+                            <div class="p-4 rounded-xl bg-clinical-subtle/70 border border-clinical-border space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-clinical-ink">Cuenta activa</span>
+                                    <span id="settings-account-badge" class="font-mono-num text-xs px-2.5 py-0.5 rounded-md bg-clinical-plumSoft text-clinical-plum">laura.kocher</span>
+                                </div>
+                                <p class="text-xs text-clinical-secondary leading-relaxed">
+                                    Todos los cambios realizados en pacientes, agenda y cobros se sincronizan automáticamente en tiempo real con tu cuenta en la nube. Podés iniciar sesión con tus mismas credenciales desde tu celular o computadora.
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                <button type="button" onclick="exportBackupJSON()" class="p-3.5 rounded-xl btn-secondary text-xs font-semibold flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4 text-clinical-plum" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                                    </svg>
+                                    <span>Exportar archivo (.json)</span>
+                                </button>
+
+                                <label class="cursor-pointer p-3.5 rounded-xl btn-secondary text-xs font-semibold flex items-center justify-center gap-2">
+                                    <svg class="w-4 h-4 text-clinical-roseText" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                                    </svg>
+                                    <span>Importar archivo (.json)</span>
+                                    <input type="file" id="import-backup-file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 border-t border-clinical-border flex items-center justify-between">
+                            <span class="text-xs text-clinical-muted">Reiniciar todos los registros de la cuenta</span>
+                            <button type="button" onclick="clearAllDataConfirm()" class="px-3 py-1.5 rounded-lg bg-clinical-overdueBg text-clinical-overdueText text-xs font-semibold hover:opacity-90 transition">
+                                Vaciar registros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- ================= BARRA DE NAVEGACIÓN INFERIOR (MOBILE) ================= -->
+    <!-- ========================================================================= -->
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-clinical-border z-30 px-2 py-1.5 flex items-center justify-around">
+        <button onclick="switchTab('agenda')" id="nav-mobile-agenda" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-[11px] font-medium transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+            </svg>
+            <span class="mt-0.5">Agenda</span>
+        </button>
+
+        <button onclick="switchTab('disponibilidad')" id="nav-mobile-disponibilidad" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-[11px] font-medium transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="mt-0.5">Libres</span>
+        </button>
+
+        <button onclick="openAppointmentModal()" class="flex flex-col items-center justify-center -mt-5">
+            <div class="w-11 h-11 rounded-xl btn-primary flex items-center justify-center shadow-elevated border-2 border-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                </svg>
+            </div>
+            <span class="mt-0.5 text-[10px] font-semibold text-clinical-plum">Turno</span>
+        </button>
+
+        <button onclick="switchTab('finanzas')" id="nav-mobile-finanzas" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-[11px] font-medium transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/>
+            </svg>
+            <span class="mt-0.5">Honorarios</span>
+        </button>
+
+        <button onclick="switchTab('pacientes')" id="nav-mobile-pacientes" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-[11px] font-medium transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+            </svg>
+            <span class="mt-0.5">Pacientes</span>
+        </button>
+    </nav>
+
+    <!-- ========================================================================= -->
+    <!-- ======================== MODALES Y CAJONES (DRAWERS) ==================== -->
+    <!-- ========================================================================= -->
+
+    <!-- 1. MODAL: AGENDAR / EDITAR TURNO -->
+    <div id="modal-appointment" class="fixed inset-0 z-50 hidden bg-clinical-ink/40 backdrop-blur-[2px] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl shadow-modal border border-clinical-border overflow-hidden animate-view max-h-[92vh] flex flex-col">
+            <div class="px-5 py-4 border-b border-clinical-border flex items-center justify-between shrink-0">
+                <div>
+                    <h3 id="modal-appt-title" class="text-sm font-semibold text-clinical-ink">Programar sesión clínica</h3>
+                    <p class="text-xs text-clinical-secondary">Asignación de paciente, horario y condiciones de honorarios</p>
+                </div>
+                <button onclick="closeAppointmentModal()" class="p-1.5 rounded-lg text-clinical-secondary hover:bg-clinical-subtle">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="form-appointment" onsubmit="saveAppointment(event)" class="p-5 space-y-4 overflow-y-auto">
+                <input type="hidden" id="appt-id">
+
+                <!-- Selector de paciente o alta rápida -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-medium text-clinical-ink">Paciente</label>
+                        <button type="button" onclick="toggleInlineNewPatient()" id="btn-toggle-new-patient" class="text-xs font-semibold text-clinical-plum hover:underline">
+                            + Dar de alta nuevo paciente
+                        </button>
+                    </div>
+
+                    <div id="existing-patient-select-wrap">
+                        <select id="appt-patient-id" onchange="onAppointmentPatientChange(this.value)" class="w-full px-3.5 py-2 rounded-xl text-sm input-clinical">
+                        </select>
+                    </div>
+
+                    <div id="inline-new-patient-wrap" class="hidden p-3.5 rounded-xl bg-clinical-subtle/70 border border-clinical-border space-y-3">
+                        <p class="text-xs font-semibold text-clinical-plum">Alta rápida de paciente</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-medium text-clinical-secondary mb-1">Nombre y apellido *</label>
+                                <input type="text" id="new-patient-name" placeholder="Ej: Sofía Martínez" class="w-full px-3 py-1.5 rounded-lg text-xs input-clinical">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-medium text-clinical-secondary mb-1">Teléfono WhatsApp *</label>
+                                <input type="tel" id="new-patient-phone" placeholder="5491123456789" class="w-full px-3 py-1.5 rounded-lg text-xs input-clinical font-mono-num">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contacto, Modalidad y Estado Clínico -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1">WhatsApp</label>
+                        <input type="tel" id="appt-phone" required placeholder="54911..." class="w-full px-3 py-2 rounded-xl text-xs input-clinical font-mono-num">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1">Modalidad</label>
+                        <select id="appt-modality" class="w-full px-3 py-2 rounded-xl text-xs input-clinical">
+                            <option value="Online">Online (Videollamada)</option>
+                            <option value="Presencial">Consultorio Presencial</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1">Estado de sesión</label>
+                        <select id="appt-session-status" class="w-full px-3 py-2 rounded-xl text-xs input-clinical">
+                            <option value="Programado">Programado</option>
+                            <option value="Realizado">Realizado</option>
+                            <option value="Reprogramado">Reprogramado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Fecha, Hora y Duración -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1">Fecha</label>
+                        <input type="date" id="appt-date" required onchange="syncDueDateWithApptDate(this.value)" class="w-full px-3 py-2 rounded-xl text-xs input-clinical font-mono-num">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1">Horario</label>
+                        <select id="appt-time" required class="w-full px-3 py-2 rounded-xl text-xs input-clinical font-mono-num">
+                            <option value="08:00">08:00</option>
+                            <option value="09:00">09:00</option>
+                            <option value="10:00">10:00</option>
+                            <option value="11:00">11:00</option>
+                            <option value="12:00">12:00</option>
+                            <option value="13:00">13:00</option>
+                            <option value="14:00">14:00</option>
+                            <option value="15:00">15:00</option>
+                            <option value="16:00">16:00</option>
+                            <option value="17:00">17:00</option>
+                            <option value="18:00">18:00</option>
+                            <option value="19:00">19:00</option>
+                            <option value="20:00">20:00</option>
+                            <option value="21:00">21:00</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1">Duración</label>
+                        <select id="appt-duration" class="w-full px-3 py-2 rounded-xl text-xs input-clinical font-mono-num">
+                            <option value="45">45 min</option>
+                            <option value="50" selected>50 min</option>
+                            <option value="60">60 min</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Honorarios y Vencimiento -->
+                <div class="p-4 rounded-xl bg-clinical-subtle/60 border border-clinical-border space-y-3">
+                    <span class="text-[11px] font-semibold uppercase tracking-wider text-clinical-secondary">Liquidación de honorarios</span>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-clinical-ink mb-1">Importe de la sesión ($ ARS)</label>
+                            <input type="number" id="appt-price" required min="0" step="500" class="w-full px-3 py-2 rounded-lg text-xs input-clinical font-mono-num">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-clinical-ink mb-1">Fecha límite de pago</label>
+                            <input type="date" id="appt-due-date" required class="w-full px-3 py-2 rounded-lg text-xs input-clinical font-mono-num">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-clinical-ink mb-1">Estado contable</label>
+                            <select id="appt-payment-status" onchange="togglePaymentMethodSelect()" class="w-full px-3 py-2 rounded-lg text-xs input-clinical">
+                                <option value="unpaid">Pendiente de cobro</option>
+                                <option value="paid">Acreditado / Pagado</option>
+                            </select>
+                        </div>
+                        <div id="appt-payment-method-wrap" class="hidden">
+                            <label class="block text-xs font-medium text-clinical-ink mb-1">Medio de cobro</label>
+                            <select id="appt-payment-method" class="w-full px-3 py-2 rounded-lg text-xs input-clinical">
+                                <option value="Transferencia">Transferencia bancaria</option>
+                                <option value="Mercado Pago">Mercado Pago</option>
+                                <option value="Efectivo">Efectivo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observaciones -->
+                <div>
+                    <label class="block text-xs font-medium text-clinical-ink mb-1">Notas administrativas (opcional)</label>
+                    <input type="text" id="appt-notes" placeholder="Referencia, link de sesión o recordatorio interno..." class="w-full px-3.5 py-2 rounded-xl text-xs input-clinical">
+                </div>
+
+                <!-- Notificación automática por WhatsApp -->
+                <label class="flex items-center gap-2.5 p-3 rounded-xl bg-clinical-subtle/50 border border-clinical-border cursor-pointer">
+                    <input type="checkbox" id="appt-send-wa-after" class="w-4 h-4 accent-clinical-plum rounded">
+                    <span class="text-xs font-medium text-clinical-ink">
+                        Abrir WhatsApp al guardar para enviar confirmación de turno al paciente
+                    </span>
+                </label>
+
+                <div class="pt-2 flex items-center justify-end gap-2 border-t border-clinical-border">
+                    <button type="button" onclick="closeAppointmentModal()" class="px-4 py-2 rounded-xl btn-secondary text-xs font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl btn-primary text-xs font-semibold">
+                        Guardar turno
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. MODAL: REGISTRAR COBRO EN 1 CLIC -->
+    <div id="modal-confirm-payment" class="fixed inset-0 z-50 hidden bg-clinical-ink/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-modal border border-clinical-border overflow-hidden animate-view">
+            <div class="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-clinical-ink">Registrar acreditación de pago</h3>
+                    <p class="text-xs text-clinical-secondary">Imputación en el libro de honorarios</p>
+                </div>
+                <button onclick="closeConfirmPaymentModal()" class="p-1.5 rounded-lg text-clinical-secondary hover:bg-clinical-subtle">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4">
+                <input type="hidden" id="pay-modal-appt-id">
+
+                <div class="p-3.5 rounded-xl bg-clinical-subtle/70 border border-clinical-border flex items-center justify-between">
+                    <div>
+                        <p id="pay-modal-patient" class="text-sm font-semibold text-clinical-ink">Paciente</p>
+                        <p id="pay-modal-date" class="font-mono-num text-xs text-clinical-secondary">Sesión</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] uppercase tracking-wider text-clinical-muted font-semibold">Honorarios</span>
+                        <p id="pay-modal-amount" class="font-mono-num text-base font-semibold text-clinical-plum">$0</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-clinical-secondary mb-2">Seleccioná el medio de pago recibido:</label>
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <button type="button" onclick="executeConfirmPayment('Transferencia')" class="p-3 rounded-xl btn-secondary hover:border-clinical-plum text-center space-y-1">
+                            <span class="block text-xs font-semibold text-clinical-ink">Transferencia</span>
+                            <span class="block text-[10px] text-clinical-muted">CBU / Alias</span>
+                        </button>
+                        <button type="button" onclick="executeConfirmPayment('Mercado Pago')" class="p-3 rounded-xl btn-secondary hover:border-clinical-plum text-center space-y-1">
+                            <span class="block text-xs font-semibold text-clinical-ink">Mercado Pago</span>
+                            <span class="block text-[10px] text-clinical-muted">Cuenta digital</span>
+                        </button>
+                        <button type="button" onclick="executeConfirmPayment('Efectivo')" class="p-3 rounded-xl btn-secondary hover:border-clinical-plum text-center space-y-1">
+                            <span class="block text-xs font-semibold text-clinical-ink">Efectivo</span>
+                            <span class="block text-[10px] text-clinical-muted">En consultorio</span>
+                        </button>
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2 pt-1 cursor-pointer">
+                    <input type="checkbox" id="pay-modal-send-receipt" class="w-4 h-4 accent-clinical-plum rounded">
+                    <span class="text-xs text-clinical-secondary">Enviar comprobante de recepción de pago por WhatsApp</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MODAL: COMPARTIR HORARIOS DISPONIBLES POR WHATSAPP -->
+    <div id="modal-share-availability" class="fixed inset-0 z-50 hidden bg-clinical-ink/40 backdrop-blur-[2px] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl shadow-modal border border-clinical-border overflow-hidden animate-view">
+            <div class="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-clinical-ink">Compartir disponibilidad semanal</h3>
+                    <p class="text-xs text-clinical-secondary">Resumen de horarios libres listo para enviar por WhatsApp</p>
+                </div>
+                <button onclick="closeShareAvailabilityModal()" class="p-1.5 rounded-lg text-clinical-secondary hover:bg-clinical-subtle">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-clinical-ink mb-1.5">Destinatario (opcional)</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <select id="share-avail-patient" onchange="onShareAvailPatientSelect(this.value)" class="px-3 py-2 rounded-xl text-xs input-clinical">
+                            <option value="">-- Seleccionar paciente --</option>
+                        </select>
+                        <input type="tel" id="share-avail-phone" placeholder="WhatsApp: 54911..." class="px-3 py-2 rounded-xl text-xs input-clinical font-mono-num">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="text-xs font-medium text-clinical-ink">Texto del mensaje (editable)</label>
+                        <button type="button" onclick="regenerateAvailabilityText()" class="text-xs font-semibold text-clinical-plum hover:underline">
+                            Restaurar texto
+                        </button>
+                    </div>
+                    <textarea id="share-avail-textarea" rows="7" class="w-full p-3.5 rounded-xl text-xs leading-relaxed input-clinical font-mono-num"></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-end gap-2 pt-2 border-t border-clinical-border">
+                    <button type="button" onclick="copyTextareaAvailability()" class="w-full sm:w-auto px-4 py-2 rounded-xl btn-secondary text-xs font-semibold">
+                        Copiar al portapapeles
+                    </button>
+                    <button type="button" onclick="sendAvailabilityViaWhatsApp()" class="w-full sm:w-auto px-5 py-2 rounded-xl btn-primary text-xs font-semibold">
+                        Enviar por WhatsApp
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. MODAL: ALTA / EDICIÓN DE PACIENTE -->
+    <div id="modal-patient" class="fixed inset-0 z-50 hidden bg-clinical-ink/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-modal border border-clinical-border overflow-hidden animate-view">
+            <div class="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
+                <h3 id="modal-patient-title" class="text-sm font-semibold text-clinical-ink">Ficha de paciente</h3>
+                <button onclick="closePatientModal()" class="p-1.5 rounded-lg text-clinical-secondary hover:bg-clinical-subtle">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="form-patient" onsubmit="savePatientFromModal(event)" class="p-5 space-y-4">
+                <input type="hidden" id="patient-modal-id">
+
+                <div>
+                    <label class="block text-xs font-medium text-clinical-ink mb-1">Nombre y apellido *</label>
+                    <input type="text" id="patient-modal-name" required placeholder="Ej: Valentina Pérez" class="w-full px-3.5 py-2 rounded-xl text-sm input-clinical">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-clinical-ink mb-1">Teléfono WhatsApp (con código de país) *</label>
+                    <input type="tel" id="patient-modal-phone" required placeholder="5491123456789" class="w-full px-3.5 py-2 rounded-xl text-sm input-clinical font-mono-num">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1">Honorario acordado ($)</label>
+                        <input type="number" id="patient-modal-fee" required min="0" step="500" class="w-full px-3.5 py-2 rounded-xl text-sm input-clinical font-mono-num">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-clinical-ink mb-1">Modalidad habitual</label>
+                        <select id="patient-modal-modality" class="w-full px-3 py-2 rounded-xl text-sm input-clinical">
+                            <option value="Online">Online</option>
+                            <option value="Presencial">Presencial</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-clinical-ink mb-1">Observaciones administrativas / Cobertura</label>
+                    <input type="text" id="patient-modal-notes" placeholder="Obra social, reintegro, frecuencia semanal..." class="w-full px-3.5 py-2 rounded-xl text-xs input-clinical">
+                </div>
+
+                <div class="pt-2 flex items-center justify-end gap-2 border-t border-clinical-border">
+                    <button type="button" onclick="closePatientModal()" class="px-4 py-2 rounded-xl btn-secondary text-xs font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl btn-primary text-xs font-semibold">
+                        Guardar paciente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. CAJÓN LATERAL (DRAWER): EXPEDIENTE ADMINISTRATIVO DEL PACIENTE -->
+    <div id="drawer-patient-history" class="fixed inset-0 z-50 hidden bg-clinical-ink/40 backdrop-blur-[2px] flex justify-end">
+        <div class="bg-white w-full max-w-md h-full shadow-modal border-l border-clinical-border flex flex-col animate-view">
+            <div class="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-semibold uppercase tracking-wider text-clinical-plum">Expediente de sesiones y cobros</span>
+                    <h3 id="drawer-patient-name" class="text-base font-semibold text-clinical-ink mt-0.5">Paciente</h3>
+                </div>
+                <button onclick="closePatientHistoryDrawer()" class="p-1.5 rounded-lg text-clinical-secondary hover:bg-clinical-subtle">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="drawer-patient-summary" class="p-5 border-b border-clinical-border bg-clinical-subtle/50 grid grid-cols-2 gap-3"></div>
+
+            <div class="flex-1 p-5 overflow-y-auto space-y-2.5" id="drawer-patient-sessions"></div>
+
+            <div class="p-4 border-t border-clinical-border flex items-center justify-between gap-2 bg-white">
+                <button id="drawer-btn-wa" class="px-3.5 py-2 rounded-xl btn-secondary text-xs font-semibold flex-1">
+                    Contactar por WhatsApp
+                </button>
+                <button id="drawer-btn-new-appt" class="px-4 py-2 rounded-xl btn-primary text-xs font-semibold flex-1">
+                    Agendar turno
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. MODAL: ACCIÓN EN HORARIO DISPONIBLE -->
+    <div id="modal-slot-action" class="fixed inset-0 z-50 hidden bg-clinical-ink/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-modal border border-clinical-border overflow-hidden animate-view">
+            <div class="px-5 py-4 border-b border-clinical-border flex items-center justify-between">
+                <div>
+                    <h3 class="text-sm font-semibold text-clinical-ink">Franja horaria disponible</h3>
+                    <p id="slot-modal-label" class="font-mono-num text-xs text-clinical-secondary mt-0.5">Fecha y hora</p>
+                </div>
+                <button onclick="closeSlotActionModal()" class="p-1.5 rounded-lg text-clinical-secondary hover:bg-clinical-subtle">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-2.5">
+                <button onclick="triggerAssignFromSlotModal()" class="w-full py-2.5 px-4 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-2">
+                    <span>Asignar turno en este horario</span>
+                </button>
+                <button onclick="triggerBlockFromSlotModal()" class="w-full py-2.5 px-4 rounded-xl btn-secondary text-xs font-semibold flex items-center justify-center gap-2">
+                    <span>Bloquear horario personal / supervisión</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. MODAL DE CONFIRMACIÓN -->
+    <div id="modal-custom-confirm" class="fixed inset-0 z-50 hidden bg-clinical-ink/40 backdrop-blur-[2px] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-modal border border-clinical-border p-5 space-y-4 animate-view">
+            <div>
+                <h4 id="confirm-modal-title" class="text-sm font-semibold text-clinical-ink">Confirmar operación</h4>
+                <p id="confirm-modal-desc" class="text-xs text-clinical-secondary mt-1 leading-relaxed">¿Deseás continuar?</p>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-clinical-border">
+                <button onclick="closeCustomConfirm()" class="px-3.5 py-1.5 rounded-lg btn-secondary text-xs font-semibold">
+                    Cancelar
+                </button>
+                <button id="confirm-modal-action-btn" class="px-4 py-1.5 rounded-lg bg-clinical-overdueText hover:opacity-95 text-white text-xs font-semibold">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR DE NOTIFICACIONES (TOAST) -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 pointer-events-none"></div>
+
+    <!-- ========================================================================= -->
+    <!-- ====== FIREBASE CLOUD FIRESTORE & AUTHENTICATION + APP LOGIC ============ -->
+    <!-- ========================================================================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- 1. CONFIGURACIÓN CLOUD Y ESTADO DE LA APLICACIÓN ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'lic-laura-kocher-clinical';
+        const SESSION_KEY = 'lk_clinical_active_session_v2';
+        const LOCAL_MIRROR_PREFIX = 'lk_clinical_workspace_v2_';
+
+        let db = null;
+        let auth = null;
+        let firebaseUser = null;
+        let unsubscribeWorkspace = null;
+        let isApplyingRemoteUpdate = false;
+        let authMode = 'login'; // 'login' | 'register'
+
+        let appState = {
+            currentTab: 'agenda',
+            agendaQuickFilter: 'day',
+            selectedDate: getTodayISO(),
+            weekOffset: 0,
+            accountKey: '',
+            username: '',
+            passwordHash: '',
+            settings: {
+                psychName: 'Lic. Laura Kocher',
+                alias: 'laura.kocher.mp',
+                bankName: 'Mercado Pago',
+                defaultFee: 25000,
+                startHour: 9,
+                endHour: 20
+            },
+            // Inicia 100% vacío para cada cuenta nueva
+            patients: [],
+            appointments: [],
+            blockedSlots: []
+        };
+
+        let pendingSlotSelection = { date: null, time: null };
+        let isCreatingInlinePatient = false;
+
+        // --- 2. INICIALIZACIÓN DE FIREBASE CON REGLAS ESTRICTAS ---
+        async function initCloudConnection() {
+            const readyLabel = document.getElementById('auth-cloud-ready');
+            try {
+                const firebaseConfig = {
+                    apiKey: "AIzaSyCjYrrXhcIf_3r7ToNyKhoAOZXMk4XNmmw",
+                    authDomain: "consultorio-laura.firebaseapp.com",
+                    projectId: "consultorio-laura",
+                    storageBucket: "consultorio-laura.firebasestorage.app",
+                    messagingSenderId: "933368329440",
+                    appId: "1:933368329440:web:9548c31df444a563bfcc85"
+                };
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    firebaseUser = user;
+                    if (readyLabel) readyLabel.textContent = user ? 'Nube activa' : 'Modo local';
+                });
+            } catch (err) {
+                console.warn('Fallback a persistencia local segura:', err);
+                if (readyLabel) readyLabel.textContent = 'Almacenamiento local activo';
+            }
+
+            // Verificar si ya había una sesión profesional iniciada
+            const savedSession = localStorage.getItem(SESSION_KEY);
+            if (savedSession) {
+                try {
+                    const parsed = JSON.parse(savedSession);
+                    if (parsed.accountKey && parsed.username) {
+                        await resumeProfessionalSession(parsed.accountKey, parsed.username, parsed.passwordHash);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        }
+
+        // Normalización de identificador de cuenta y hash simple de contraseña
+        function normalizeAccountKey(username) {
+            return String(username || '')
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9._-]/g, '_');
+        }
+
+        function simpleHash(str) {
+            let h = 2166136261;
+            const s = String(str || '');
+            for (let i = 0; i < s.length; i++) {
+                h ^= s.charCodeAt(i);
+                h += (h << 1) + (h << 4) + (h << 7) + (h << 8) + (h << 24);
+            }
+            return (h >>> 0).toString(16);
+        }
+
+        function setSyncIndicator(state, label) {
+            const dot = document.getElementById('sync-status-dot');
+            const text = document.getElementById('sync-status-text');
+            if (!dot || !text) return;
+            if (state === 'saving') {
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-clinical-plum animate-pulse';
+                text.textContent = label || 'Sincronizando...';
+            } else if (state === 'synced') {
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-600';
+                text.textContent = label || 'Sincronizado en la nube';
+            } else {
+                dot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500';
+                text.textContent = label || 'Guardado en dispositivo';
+            }
+        }
+
+        // --- 3. AUTENTICACIÓN PROFESIONAL Y SINCRONIZACIÓN FIRESTORE EN TIEMPO REAL ---
+        window.setAuthMode = function(mode) {
+            authMode = mode;
+            const loginBtn = document.getElementById('tab-auth-login');
+            const regBtn = document.getElementById('tab-auth-register');
+            const regFields = document.getElementById('auth-register-fields');
+            const submitText = document.getElementById('auth-submit-text');
+            const errBox = document.getElementById('auth-error-box');
+            errBox.classList.add('hidden');
+
+            if (mode === 'login') {
+                loginBtn.className = 'py-2 text-xs font-semibold rounded-lg transition-all bg-white text-clinical-ink shadow-card';
+                regBtn.className = 'py-2 text-xs font-semibold rounded-lg transition-all text-clinical-secondary hover:text-clinical-ink';
+                regFields.classList.add('hidden');
+                submitText.textContent = 'Ingresar al consultorio';
+            } else {
+                regBtn.className = 'py-2 text-xs font-semibold rounded-lg transition-all bg-white text-clinical-ink shadow-card';
+                loginBtn.className = 'py-2 text-xs font-semibold rounded-lg transition-all text-clinical-secondary hover:text-clinical-ink';
+                regFields.classList.remove('hidden');
+                submitText.textContent = 'Crear cuenta e ingresar';
+            }
+        };
+
+        function showAuthError(msg) {
+            const errBox = document.getElementById('auth-error-box');
+            errBox.textContent = msg;
+            errBox.classList.remove('hidden');
+        }
+
+        window.handleAuthSubmit = async function(e) {
+            e.preventDefault();
+            const rawUser = document.getElementById('auth-username').value.trim();
+            const rawPass = document.getElementById('auth-password').value;
+            const accountKey = normalizeAccountKey(rawUser);
+
+            if (!accountKey || accountKey.length < 3) {
+                showAuthError('Ingresá un usuario o correo válido (mínimo 3 caracteres).');
+                return;
+            }
+            if (!rawPass || rawPass.length < 4) {
+                showAuthError('La contraseña debe tener al menos 4 caracteres.');
+                return;
+            }
+
+            const passHash = simpleHash(rawPass);
+            const submitBtn = document.getElementById('auth-submit-btn');
+            submitBtn.disabled = true;
+
+            try {
+                let remoteData = null;
+                if (db && firebaseUser) {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'clinical_workspaces', accountKey);
+                    const snap = await getDoc(docRef);
+                    if (snap.exists()) {
+                        remoteData = snap.data();
+                    }
+                } else {
+                    const localRaw = localStorage.getItem(LOCAL_MIRROR_PREFIX + accountKey);
+                    if (localRaw) remoteData = JSON.parse(localRaw);
+                }
+
+                if (authMode === 'register') {
+                    if (remoteData && remoteData.passwordHash && remoteData.passwordHash !== passHash) {
+                        showAuthError('Ese usuario ya está registrado. Iniciá sesión con tu contraseña.');
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                    const psychName = document.getElementById('auth-psych-name').value.trim() || 'Lic. Laura Kocher';
+                    const alias = document.getElementById('auth-alias').value.trim() || 'laura.kocher.mp';
+
+                    appState.accountKey = accountKey;
+                    appState.username = rawUser;
+                    appState.passwordHash = passHash;
+                    appState.settings = {
+                        psychName,
+                        alias,
+                        bankName: 'Mercado Pago',
+                        defaultFee: 25000,
+                        startHour: 9,
+                        endHour: 20
+                    };
+                    // 100% vacío de fábrica
+                    appState.patients = [];
+                    appState.appointments = [];
+                    appState.blockedSlots = [];
+
+                    await saveStateToCloudAndLocal();
+                    completeLoginTransition();
+                } else {
+                    // Modo Login
+                    if (remoteData) {
+                        if (remoteData.passwordHash && remoteData.passwordHash !== passHash) {
+                            showAuthError('Contraseña incorrecta para esta cuenta profesional.');
+                            submitBtn.disabled = false;
+                            return;
+                        }
+                        applyWorkspaceData(remoteData, accountKey, rawUser, passHash);
+                        completeLoginTransition();
+                    } else {
+                        // Si la cuenta aún no existe en la nube, la inicializa limpia con esas credenciales
+                        appState.accountKey = accountKey;
+                        appState.username = rawUser;
+                        appState.passwordHash = passHash;
+                        appState.patients = [];
+                        appState.appointments = [];
+                        appState.blockedSlots = [];
+                        await saveStateToCloudAndLocal();
+                        completeLoginTransition();
+                    }
+                }
+            } catch (err) {
+                console.error('Error en autenticación:', err);
+                showAuthError('No se pudo verificar la cuenta. Reintentá en unos segundos.');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        };
+
+        async function resumeProfessionalSession(accountKey, username, passwordHash) {
+            appState.accountKey = accountKey;
+            appState.username = username;
+            appState.passwordHash = passwordHash;
+
+            // Cargar espejo local inmediato para latencia cero
+            const localRaw = localStorage.getItem(LOCAL_MIRROR_PREFIX + accountKey);
+            if (localRaw) {
+                try {
+                    applyWorkspaceData(JSON.parse(localRaw), accountKey, username, passwordHash);
+                } catch (e) {}
+            }
+
+            completeLoginTransition();
+        }
+
+        function applyWorkspaceData(data, accountKey, username, passwordHash) {
+            appState.accountKey = accountKey;
+            appState.username = username || data.username || accountKey;
+            appState.passwordHash = passwordHash || data.passwordHash || '';
+            if (data.settings) {
+                appState.settings = { ...appState.settings, ...data.settings };
+            }
+            appState.patients = Array.isArray(data.patients) ? data.patients : [];
+            appState.appointments = Array.isArray(data.appointments) ? data.appointments : [];
+            appState.blockedSlots = Array.isArray(data.blockedSlots) ? data.blockedSlots : [];
+        }
+
+        function completeLoginTransition() {
+            localStorage.setItem(SESSION_KEY, JSON.stringify({
+                accountKey: appState.accountKey,
+                username: appState.username,
+                passwordHash: appState.passwordHash
+            }));
+
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('sidebar-user-label').textContent = appState.username;
+            document.getElementById('settings-account-badge').textContent = appState.username;
+
+            subscribeToRealtimeWorkspace(appState.accountKey);
+            switchTab('agenda');
+        }
+
+        function subscribeToRealtimeWorkspace(accountKey) {
+            if (unsubscribeWorkspace) {
+                unsubscribeWorkspace();
+                unsubscribeWorkspace = null;
+            }
+            if (!db || !firebaseUser || !accountKey) {
+                setSyncIndicator('local', 'Guardado en dispositivo');
+                return;
+            }
+
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'clinical_workspaces', accountKey);
+            unsubscribeWorkspace = onSnapshot(
+                docRef,
+                (snapshot) => {
+                    if (snapshot.exists()) {
+                        const data = snapshot.data();
+                        isApplyingRemoteUpdate = true;
+                        applyWorkspaceData(data, accountKey, appState.username, appState.passwordHash);
+                        localStorage.setItem(LOCAL_MIRROR_PREFIX + accountKey, JSON.stringify(data));
+                        refreshAllUI();
+                        isApplyingRemoteUpdate = false;
+                        setSyncIndicator('synced', 'Sincronizado en la nube');
+                    }
+                },
+                (err) => {
+                    console.warn('Error en suscripción Firestore:', err);
+                    setSyncIndicator('local', 'Guardado local activo');
+                }
+            );
+        }
+
+        async function saveStateToCloudAndLocal() {
+            if (!appState.accountKey || isApplyingRemoteUpdate) return;
+
+            const payload = {
+                accountKey: appState.accountKey,
+                username: appState.username,
+                passwordHash: appState.passwordHash,
+                settings: appState.settings,
+                patients: appState.patients,
+                appointments: appState.appointments,
+                blockedSlots: appState.blockedSlots,
+                updatedAt: new Date().toISOString()
+            };
+
+            // 1. Espejo local instantáneo
+            try {
+                localStorage.setItem(LOCAL_MIRROR_PREFIX + appState.accountKey, JSON.stringify(payload));
+            } catch (e) {
+                console.error(e);
+            }
+
+            // 2. Guardado en Cloud Firestore
+            if (db && firebaseUser) {
+                try {
+                    setSyncIndicator('saving', 'Sincronizando...');
+                    const pubDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'clinical_workspaces', appState.accountKey);
+                    await setDoc(pubDocRef, payload, { merge: true });
+                    setSyncIndicator('synced', 'Sincronizado en la nube');
+                } catch (err) {
+                    console.error('Error guardando en Firestore:', err);
+                    setSyncIndicator('local', 'Guardado en dispositivo');
+                }
+            } else {
+                setSyncIndicator('local', 'Guardado en dispositivo');
+            }
+        }
+
+        window.handleLogout = function() {
+            if (unsubscribeWorkspace) {
+                unsubscribeWorkspace();
+                unsubscribeWorkspace = null;
+            }
+            localStorage.removeItem(SESSION_KEY);
+            appState.accountKey = '';
+            appState.patients = [];
+            appState.appointments = [];
+            appState.blockedSlots = [];
+            document.getElementById('auth-password').value = '';
+            document.getElementById('auth-screen').classList.remove('hidden');
+        };
+
+        // --- 4. UTILIDADES DE FECHA, MONEDA Y FORMATO ---
+        function getTodayISO() {
+            return formatDateISO(new Date());
+        }
+
+        function formatDateISO(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function parseISODate(isoStr) {
+            const [y, m, d] = (isoStr || getTodayISO()).split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function formatHumanDate(isoStr, includeYear = false) {
+            if (!isoStr) return '';
+            const dt = parseISODate(isoStr);
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const res = `${days[dt.getDay()]} ${String(dt.getDate()).padStart(2, '0')} ${months[dt.getMonth()]}`;
+            return includeYear ? `${res} ${dt.getFullYear()}` : res;
+        }
+
+        function formatCurrency(val) {
+            const num = Number(val) || 0;
+            return '$' + num.toLocaleString('es-AR');
+        }
+
+        function cleanPhoneForWhatsApp(phone) {
+            if (!phone) return '';
+            return String(phone).replace(/[^0-9]/g, '');
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getInitials(name) {
+            if (!name) return 'LK';
+            return name.trim().split(/\s+/).map(n => n[0]).join('').substring(0, 2).toUpperCase();
+        }
+
+        // --- 5. NAVEGACIÓN Y RENDERIZADO GENERAL ---
+        window.switchTab = function(tabName) {
+            appState.currentTab = tabName;
+            const views = ['agenda', 'disponibilidad', 'finanzas', 'pacientes', 'ajustes'];
+
+            views.forEach(v => {
+                const section = document.getElementById(`view-${v}`);
+                if (section) {
+                    if (v === tabName) section.classList.remove('hidden');
+                    else section.classList.add('hidden');
+                }
+
+                const dBtn = document.getElementById(`nav-desktop-${v}`);
+                if (dBtn) {
+                    if (v === tabName) {
+                        dBtn.className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-clinical-plum text-white transition-all';
+                    } else {
+                        dBtn.className = 'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium text-clinical-secondary hover:bg-clinical-subtle hover:text-clinical-ink transition-all';
+                    }
+                }
+
+                const mBtn = document.getElementById(`nav-mobile-${v}`);
+                if (mBtn) {
+                    if (v === tabName) {
+                        mBtn.className = 'flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-[11px] font-semibold text-clinical-plum bg-clinical-plumSoft transition';
+                    } else {
+                        mBtn.className = 'flex flex-col items-center justify-center py-1 px-2.5 rounded-lg text-[11px] font-medium text-clinical-secondary transition';
+                    }
+                }
+            });
+
+            const headerMeta = {
+                agenda: ['Agenda de turnos', 'Organización de sesiones, asistencia y liquidación de honorarios'],
+                disponibilidad: ['Disponibilidad horaria', 'Gestión de turnos libres y bloqueos de agenda semanal'],
+                finanzas: ['Honorarios y cobros', 'Control de cuentas por cobrar, vencimientos e historial de transacciones'],
+                pacientes: ['Directorio de pacientes', 'Fichas de pacientes activos, aranceles e historial administrativo'],
+                ajustes: ['Configuración del consultorio', 'Parámetros profesionales, datos bancarios y copias de respaldo']
+            };
+
+            document.getElementById('header-title').textContent = headerMeta[tabName][0];
+            document.getElementById('header-subtitle').textContent = headerMeta[tabName][1];
+
+            refreshAllUI();
+        };
+
+        function refreshAllUI() {
+            document.getElementById('sidebar-brand-name').textContent = appState.settings.psychName;
+            document.getElementById('sidebar-alias-label').textContent = `Alias: ${appState.settings.alias}`;
+            const bankDisplay = appState.settings.bankName
+                ? `${appState.settings.psychName} · ${appState.settings.bankName} · Alias/CBU: ${appState.settings.alias}`
+                : `${appState.settings.psychName} · Alias/CBU: ${appState.settings.alias}`;
+            document.getElementById('fin-bank-summary').textContent = bankDisplay;
+
+            // Inputs de configuración
+            document.getElementById('set-psych-name').value = appState.settings.psychName || 'Lic. Laura Kocher';
+            document.getElementById('set-psych-alias').value = appState.settings.alias || '';
+            document.getElementById('set-bank-name').value = appState.settings.bankName || '';
+            document.getElementById('set-default-fee').value = appState.settings.defaultFee || 25000;
+            document.getElementById('set-start-hour').value = String(appState.settings.startHour || 9);
+            document.getElementById('set-end-hour').value = String(appState.settings.endHour || 20);
+
+            updateGlobalKPIs();
+            renderAgendaView();
+            renderAvailabilityView();
+            renderFinanzasView();
+            renderPatientsView();
+        }
+
+        function updateGlobalKPIs() {
+            const today = getTodayISO();
+            const currentMonthPrefix = today.substring(0, 7);
+
+            const activeAppts = appState.appointments.filter(a => a.sessionStatus !== 'Cancelado');
+            const todayAppts = activeAppts.filter(a => a.date === today);
+            const unpaidAppts = activeAppts.filter(a => a.paymentStatus === 'unpaid');
+            const paidAppts = appState.appointments.filter(a => a.paymentStatus === 'paid');
+            const paidThisMonth = paidAppts.filter(a => (a.paidAt || a.date).startsWith(currentMonthPrefix));
+
+            const totalPending = unpaidAppts.reduce((sum, a) => sum + Number(a.price || 0), 0);
+            const totalMonthPaid = paidThisMonth.reduce((sum, a) => sum + Number(a.price || 0), 0);
+
+            const weekDates = getWeekDates(appState.weekOffset);
+            const hours = getWorkingHoursList();
+            let freeCount = 0;
+            weekDates.forEach(d => {
+                hours.forEach(h => {
+                    const booked = activeAppts.some(a => a.date === d && a.time === h);
+                    const blocked = appState.blockedSlots.some(b => b.date === d && b.time === h);
+                    if (!booked && !blocked) freeCount++;
+                });
+            });
+
+            document.getElementById('kpi-today-count').textContent = todayAppts.length;
+            document.getElementById('kpi-today-sub').textContent = formatHumanDate(today);
+            document.getElementById('kpi-pending-amount').textContent = formatCurrency(totalPending);
+            document.getElementById('kpi-pending-count').textContent = `${unpaidAppts.length} ${unpaidAppts.length === 1 ? 'sesión pendiente' : 'sesiones pendientes'}`;
+            document.getElementById('kpi-month-paid').textContent = formatCurrency(totalMonthPaid);
+            document.getElementById('kpi-paid-count').textContent = `${paidThisMonth.length} acreditaciones en el mes`;
+            document.getElementById('kpi-free-slots').textContent = `${freeCount} hs`;
+
+            document.getElementById('badge-desktop-today').textContent = todayAppts.length;
+            document.getElementById('badge-desktop-free').textContent = `${freeCount}h`;
+            document.getElementById('badge-desktop-unpaid').textContent = unpaidAppts.length;
+            document.getElementById('badge-desktop-patients').textContent = appState.patients.length;
+        }
+
+        // --- 6. VISTA 1: AGENDA Y TURNOS ---
+        function getWeekDates(offsetWeeks = 0) {
+            const today = new Date();
+            const day = today.getDay();
+            const diffToMonday = day === 0 ? -6 : 1 - day;
+            const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + diffToMonday + (offsetWeeks * 7));
+            const dates = [];
+            for (let i = 0; i < 6; i++) {
+                const d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                dates.push(formatDateISO(d));
+            }
+            return dates;
+        }
+
+        function getWorkingHoursList() {
+            const list = [];
+            const start = Number(appState.settings.startHour) || 9;
+            const end = Number(appState.settings.endHour) || 20;
+            for (let h = start; h <= end; h++) {
+                list.push(`${String(h).padStart(2, '0')}:00`);
+            }
+            return list;
+        }
+
+        window.changeWeekOffset = function(delta) {
+            appState.weekOffset += delta;
+            const weekDates = getWeekDates(appState.weekOffset);
+            if (!weekDates.includes(appState.selectedDate)) {
+                appState.selectedDate = weekDates[0];
+            }
+            refreshAllUI();
+        };
+
+        window.resetToCurrentWeek = function() {
+            appState.weekOffset = 0;
+            appState.selectedDate = getTodayISO();
+            appState.agendaQuickFilter = 'day';
+            refreshAllUI();
+        };
+
+        window.setAgendaQuickFilter = function(filterName) {
+            appState.agendaQuickFilter = filterName;
+            if (filterName === 'today') {
+                appState.weekOffset = 0;
+                appState.selectedDate = getTodayISO();
+            }
+            renderAgendaView();
+        };
+
+        window.selectDayInStrip = function(dateISO) {
+            appState.selectedDate = dateISO;
+            appState.agendaQuickFilter = 'day';
+            renderAgendaView();
+        };
+
+        window.onDatePickerChange = function(val) {
+            if (!val) return;
+            appState.selectedDate = val;
+            appState.agendaQuickFilter = 'day';
+            renderAgendaView();
+        };
+
+        function renderAgendaView() {
+            const today = getTodayISO();
+            const weekDates = getWeekDates(appState.weekOffset);
+            document.getElementById('agenda-week-label').textContent = `${formatHumanDate(weekDates[0])} — ${formatHumanDate(weekDates[5], true)}`;
+            document.getElementById('agenda-date-picker').value = appState.selectedDate;
+
+            const filters = ['day', 'today', 'upcoming', 'unpaid', 'all'];
+            filters.forEach(f => {
+                const btn = document.getElementById(`filter-btn-${f}`);
+                if (!btn) return;
+                if (appState.agendaQuickFilter === f) {
+                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-clinical-ink shadow-card transition';
+                } else {
+                    btn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-clinical-secondary hover:text-clinical-ink transition';
+                }
+            });
+
+            const dayNames = ['Dom', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+            const stripEl = document.getElementById('agenda-week-strip');
+            stripEl.innerHTML = weekDates.map(dISO => {
+                const dt = parseISODate(dISO);
+                const dName = dayNames[dt.getDay()];
+                const dNum = String(dt.getDate()).padStart(2, '0');
+                const count = appState.appointments.filter(a => a.date === dISO && a.sessionStatus !== 'Cancelado').length;
+                const isSelected = (appState.agendaQuickFilter === 'day' || appState.agendaQuickFilter === 'today') && appState.selectedDate === dISO;
+                const isToday = dISO === today;
+
+                return `
+                    <button onclick="selectDayInStrip('${dISO}')" class="p-3 rounded-xl border text-left transition flex flex-col justify-between ${
+                        isSelected
+                            ? 'bg-clinical-plum text-white border-clinical-plum shadow-card'
+                            : isToday
+                                ? 'bg-clinical-plumSoft/60 border-clinical-borderStrong text-clinical-ink'
+                                : 'bg-white border-clinical-border text-clinical-ink hover:bg-clinical-subtle/50'
+                    }">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="text-[11px] font-medium ${isSelected ? 'text-purple-100' : 'text-clinical-secondary'}">${dName}</span>
+                            ${isToday ? `<span class="text-[10px] font-semibold px-1.5 py-0.2 rounded ${isSelected ? 'bg-white/20 text-white' : 'bg-clinical-plumSoft text-clinical-plum'}">Hoy</span>` : ''}
+                        </div>
+                        <div class="mt-2 flex items-baseline justify-between w-full">
+                            <span class="font-mono-num text-base font-semibold">${dNum}</span>
+                            <span class="font-mono-num text-[11px] ${
+                                isSelected ? 'text-purple-100' : count > 0 ? 'text-clinical-plum font-semibold' : 'text-clinical-muted'
+                            }">${count} ${count === 1 ? 'sesión' : 'sesiones'}</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            // Filtrar listado de turnos
+            let filtered = [...appState.appointments];
+            const fMode = appState.agendaQuickFilter;
+
+            if (fMode === 'day' || fMode === 'today') {
+                filtered = filtered.filter(a => a.date === appState.selectedDate);
+                document.getElementById('agenda-list-title').textContent = `Sesiones del ${formatHumanDate(appState.selectedDate, true)}`;
+            } else if (fMode === 'upcoming') {
+                filtered = filtered.filter(a => a.date >= today && a.sessionStatus !== 'Cancelado');
+                document.getElementById('agenda-list-title').textContent = `Próximas sesiones programadas (${filtered.length})`;
+            } else if (fMode === 'unpaid') {
+                filtered = filtered.filter(a => a.paymentStatus === 'unpaid' && a.sessionStatus !== 'Cancelado');
+                document.getElementById('agenda-list-title').textContent = `Sesiones pendientes de cobro (${filtered.length})`;
+            } else {
+                document.getElementById('agenda-list-title').textContent = `Registro completo de sesiones (${filtered.length})`;
+            }
+
+            filtered.sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                return a.time.localeCompare(b.time);
+            });
+
+            const listEl = document.getElementById('agenda-appointments-list');
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="surface-card rounded-xl p-8 text-center space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-clinical-subtle text-clinical-plum flex items-center justify-center mx-auto">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                            </svg>
+                        </div>
+                        <div class="max-w-xs mx-auto">
+                            <h4 class="text-sm font-semibold text-clinical-ink">Sin sesiones asignadas en esta vista</h4>
+                            <p class="text-xs text-clinical-secondary mt-1">
+                                Podés programar un turno seleccionando un horario disponible a la derecha o desde el botón inferior.
+                            </p>
+                        </div>
+                        <div class="pt-1">
+                            <button onclick="openAppointmentModal('${appState.selectedDate}', '10:00')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl btn-primary text-xs font-semibold">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                                </svg>
+                                <span>Programar turno</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                listEl.innerHTML = filtered.map(appt => renderAppointmentCardHTML(appt, today)).join('');
+            }
+
+            // Horarios libres del día seleccionado
+            const hours = getWorkingHoursList();
+            const freeToday = hours.filter(h => {
+                const b = appState.appointments.some(a => a.date === appState.selectedDate && a.time === h && a.sessionStatus !== 'Cancelado');
+                const bl = appState.blockedSlots.some(x => x.date === appState.selectedDate && x.time === h);
+                return !b && !bl;
+            });
+
+            const quickFreeEl = document.getElementById('agenda-quick-free-slots');
+            if (freeToday.length === 0) {
+                quickFreeEl.innerHTML = `<p class="text-xs text-clinical-muted">Agenda completa para esta fecha.</p>`;
+            } else {
+                quickFreeEl.innerHTML = freeToday.map(h => `
+                    <button onclick="openAppointmentModal('${appState.selectedDate}', '${h}')" class="font-mono-num px-2.5 py-1 rounded-lg bg-clinical-paidBg hover:bg-clinical-plum text-clinical-paidText hover:text-white border border-emerald-200 text-xs font-medium transition">
+                        ${h}
+                    </button>
+                `).join('');
+            }
+
+            // Resumen rápido de saldos pendientes
+            const unpaidList = appState.appointments
+                .filter(a => a.paymentStatus === 'unpaid' && a.sessionStatus !== 'Cancelado')
+                .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
+                .slice(0, 4);
+
+            const quickUnpaidEl = document.getElementById('agenda-quick-unpaid-list');
+            if (unpaidList.length === 0) {
+                quickUnpaidEl.innerHTML = `
+                    <div class="p-3 rounded-lg bg-clinical-subtle/50 border border-clinical-border text-xs text-clinical-secondary">
+                        No se registran saldos pendientes de cobro.
+                    </div>
+                `;
+            } else {
+                quickUnpaidEl.innerHTML = unpaidList.map(u => {
+                    const isOverdue = u.dueDate < today;
+                    return `
+                        <div class="p-3 rounded-lg border ${isOverdue ? 'bg-clinical-overdueBg/50 border-red-200' : 'bg-white border-clinical-border'} flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-xs font-semibold text-clinical-ink truncate">${escapeHTML(u.patientName)}</p>
+                                <p class="font-mono-num text-[11px] ${isOverdue ? 'text-clinical-overdueText font-medium' : 'text-clinical-secondary'}">
+                                    Venc: ${formatHumanDate(u.dueDate)} · ${formatCurrency(u.price)}
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="openConfirmPaymentModal('${u.id}')" title="Registrar cobro" class="px-2.5 py-1 rounded-md btn-primary text-[11px] font-semibold">
+                                    Cobrar
+                                </button>
+                                <button onclick="sendWhatsAppPaymentReminder('${u.id}')" title="Enviar recordatorio por WhatsApp" class="p-1.5 rounded-md btn-secondary text-clinical-secondary hover:text-clinical-ink">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderAppointmentCardHTML(appt, today) {
+            const isPaid = appt.paymentStatus === 'paid';
+            const isOverdue = !isPaid && appt.dueDate < today;
+            const sessionStatus = appt.sessionStatus || 'Programado';
+            const duration = appt.duration || 50;
+
+            let paymentBadge = '';
+            if (isPaid) {
+                paymentBadge = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-clinical-paidBg text-clinical-paidText">
+                        <span class="w-1.5 h-1.5 rounded-full bg-clinical-paidText"></span>
+                        Acreditado (${escapeHTML(appt.paymentMethod || 'Confirmado')})
+                    </span>
+                `;
+            } else if (isOverdue) {
+                paymentBadge = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-clinical-overdueBg text-clinical-overdueText">
+                        <span class="w-1.5 h-1.5 rounded-full bg-clinical-overdueText"></span>
+                        Vencido (${formatHumanDate(appt.dueDate)})
+                    </span>
+                `;
+            } else {
+                paymentBadge = `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-clinical-pendingBg text-clinical-pendingText">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-600"></span>
+                        Pendiente (Vence ${formatHumanDate(appt.dueDate)})
+                    </span>
+                `;
+            }
+
+            const modalityBadge = appt.modality === 'Online'
+                ? `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-clinical-plumSoft text-clinical-plum">Online</span>`
+                : `<span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-clinical-roseSoft text-clinical-roseText">Presencial</span>`;
+
+            return `
+                <div class="surface-card rounded-xl p-4 hover:border-clinical-borderStrong transition ${sessionStatus === 'Cancelado' ? 'opacity-60' : ''}">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+                        <!-- Izquierda: Bloque Horario + Paciente -->
+                        <div class="flex items-start gap-3.5">
+                            <div class="px-3 py-2 rounded-xl bg-clinical-subtle border border-clinical-border text-center shrink-0 min-w-[76px]">
+                                <p class="font-mono-num text-sm font-semibold text-clinical-plum leading-none">${appt.time}</p>
+                                <p class="font-mono-num text-[10px] text-clinical-secondary mt-1">${duration} min</p>
+                                <p class="font-mono-num text-[10px] text-clinical-muted mt-0.5">${formatHumanDate(appt.date)}</p>
+                            </div>
+
+                            <div class="space-y-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h4 class="text-sm font-semibold text-clinical-ink">${escapeHTML(appt.patientName)}</h4>
+                                    ${modalityBadge}
+                                    <select onchange="updateSessionStatusInline('${appt.id}', this.value)" class="text-[11px] font-medium px-2 py-0.5 rounded-md border border-clinical-border bg-clinical-bg text-clinical-secondary focus:outline-none">
+                                        <option value="Programado" ${sessionStatus === 'Programado' ? 'selected' : ''}>Programado</option>
+                                        <option value="Realizado" ${sessionStatus === 'Realizado' ? 'selected' : ''}>Realizado</option>
+                                        <option value="Reprogramado" ${sessionStatus === 'Reprogramado' ? 'selected' : ''}>Reprogramado</option>
+                                        <option value="Cancelado" ${sessionStatus === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+                                    </select>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-clinical-secondary">
+                                    <span class="font-mono-num">${escapeHTML(appt.phone)}</span>
+                                    <span>·</span>
+                                    <span class="font-mono-num font-semibold text-clinical-ink">${formatCurrency(appt.price)}</span>
+                                </div>
+                                ${appt.notes ? `<p class="text-xs text-clinical-secondary bg-clinical-subtle/60 px-2.5 py-1 rounded-lg border border-clinical-border mt-1">${escapeHTML(appt.notes)}</p>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Derecha: Estado de Cobro y Acciones -->
+                        <div class="flex flex-col sm:items-end justify-between gap-2.5 pt-2.5 sm:pt-0 border-t sm:border-t-0 border-clinical-border">
+                            ${paymentBadge}
+
+                            <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto justify-end">
+                                ${!isPaid ? `
+                                    <button onclick="openConfirmPaymentModal('${appt.id}')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg btn-primary text-xs font-semibold">
+                                        Confirmar pago
+                                    </button>
+                                ` : `
+                                    <button onclick="revertPaymentStatus('${appt.id}')" title="Revertir a pendiente" class="px-2.5 py-1.5 rounded-lg btn-secondary text-[11px] font-medium text-clinical-secondary">
+                                        Deshacer cobro
+                                    </button>
+                                `}
+
+                                <button onclick="sendWhatsAppAppointmentMessage('${appt.id}')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold flex items-center justify-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-clinical-plum" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>
+                                    </svg>
+                                    <span>Notificar WhatsApp</span>
+                                </button>
+
+                                <button onclick="openEditAppointmentModal('${appt.id}')" title="Editar sesión" class="p-1.5 rounded-lg btn-secondary text-clinical-secondary hover:text-clinical-ink">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"/>
+                                    </svg>
+                                </button>
+                                <button onclick="deleteAppointmentConfirm('${appt.id}')" title="Eliminar sesión" class="p-1.5 rounded-lg btn-secondary text-clinical-secondary hover:text-clinical-overdueText">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.updateSessionStatusInline = function(apptId, newStatus) {
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+            appt.sessionStatus = newStatus;
+            saveStateToCloudAndLocal();
+            refreshAllUI();
+            showToast(`Estado actualizado a ${newStatus}`);
+        };
+
+        // --- 7. VISTA 2: DISPONIBILIDAD Y HORARIOS LIBRES ---
+        function renderAvailabilityView() {
+            const weekDates = getWeekDates(appState.weekOffset);
+            document.getElementById('avail-week-label').textContent = `${formatHumanDate(weekDates[0])} — ${formatHumanDate(weekDates[5], true)}`;
+
+            const hours = getWorkingHoursList();
+            const container = document.getElementById('availability-grid-container');
+            const today = getTodayISO();
+
+            container.innerHTML = weekDates.map(dISO => {
+                const isToday = dISO === today;
+                const freeCount = hours.filter(h => {
+                    const b = appState.appointments.some(a => a.date === dISO && a.time === h && a.sessionStatus !== 'Cancelado');
+                    const bl = appState.blockedSlots.some(x => x.date === dISO && x.time === h);
+                    return !b && !bl;
+                }).length;
+
+                const slotsHTML = hours.map(h => {
+                    const appt = appState.appointments.find(a => a.date === dISO && a.time === h && a.sessionStatus !== 'Cancelado');
+                    const blocked = appState.blockedSlots.find(b => b.date === dISO && b.time === h);
+
+                    if (appt) {
+                        return `
+                            <div onclick="openEditAppointmentModal('${appt.id}')" class="cursor-pointer p-2 rounded-lg bg-clinical-plumSoft border border-purple-200 hover:border-clinical-plum transition flex items-center justify-between gap-2">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-mono-num text-[11px] font-semibold text-clinical-plum">${h}</span>
+                                        <span class="text-[10px] text-clinical-secondary">${appt.modality}</span>
+                                    </div>
+                                    <p class="text-xs font-medium text-clinical-ink truncate">${escapeHTML(appt.patientName)}</p>
+                                </div>
+                                <span class="w-2 h-2 rounded-full shrink-0 ${appt.paymentStatus === 'paid' ? 'bg-emerald-600' : 'bg-amber-500'}" title="${appt.paymentStatus === 'paid' ? 'Acreditado' : 'Pendiente'}"></span>
+                            </div>
+                        `;
+                    } else if (blocked) {
+                        return `
+                            <div onclick="unblockSlot('${blocked.id}')" title="Clic para desbloquear horario" class="cursor-pointer p-2 rounded-lg bg-clinical-subtle border border-clinical-border hover:border-red-300 transition flex items-center justify-between gap-2 group">
+                                <div>
+                                    <span class="font-mono-num text-[11px] text-clinical-muted line-through">${h}</span>
+                                    <p class="text-[11px] font-medium text-clinical-secondary group-hover:text-clinical-overdueText">Horario reservado</p>
+                                </div>
+                                <svg class="w-3.5 h-3.5 text-clinical-muted group-hover:text-clinical-overdueText" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <button onclick="openSlotActionModal('${dISO}', '${h}')" class="w-full p-2 rounded-lg bg-clinical-paidBg/70 hover:bg-clinical-plum text-clinical-paidText hover:text-white border border-emerald-200/80 transition flex items-center justify-between group">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono-num text-[11px] font-semibold">${h}</span>
+                                    <span class="text-[11px] font-medium">Disponible</span>
+                                </div>
+                                <svg class="w-3.5 h-3.5 opacity-50 group-hover:opacity-100" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+                                </svg>
+                            </button>
+                        `;
+                    }
+                }).join('');
+
+                return `
+                    <div class="surface-card rounded-xl overflow-hidden flex flex-col ${isToday ? 'ring-1 ring-clinical-plum' : ''}">
+                        <div class="px-3.5 py-2.5 ${isToday ? 'bg-clinical-plum text-white' : 'bg-clinical-subtle text-clinical-ink'} border-b border-clinical-border flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold">${formatHumanDate(dISO)}</p>
+                                <p class="font-mono-num text-[10px] ${isToday ? 'text-purple-100' : 'text-clinical-secondary'}">${freeCount} libres</p>
+                            </div>
+                            ${isToday ? `<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-white/20 text-white">Hoy</span>` : ''}
+                        </div>
+                        <div class="p-2.5 space-y-1.5 flex-1">
+                            ${slotsHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.openSlotActionModal = function(dateISO, timeStr) {
+            pendingSlotSelection = { date: dateISO, time: timeStr };
+            document.getElementById('slot-modal-label').textContent = `${formatHumanDate(dateISO, true)} · ${timeStr} hs`;
+            document.getElementById('modal-slot-action').classList.remove('hidden');
+        };
+
+        window.closeSlotActionModal = function() {
+            document.getElementById('modal-slot-action').classList.add('hidden');
+        };
+
+        window.triggerAssignFromSlotModal = function() {
+            const { date, time } = pendingSlotSelection;
+            closeSlotActionModal();
+            openAppointmentModal(date, time);
+        };
+
+        window.triggerBlockFromSlotModal = function() {
+            const { date, time } = pendingSlotSelection;
+            closeSlotActionModal();
+            appState.blockedSlots.push({
+                id: 'blk_' + Date.now(),
+                date,
+                time,
+                reason: 'Reservado'
+            });
+            saveStateToCloudAndLocal();
+            refreshAllUI();
+            showToast(`Franja ${time} hs reservada`);
+        };
+
+        window.unblockSlot = function(blockId) {
+            appState.blockedSlots = appState.blockedSlots.filter(b => b.id !== blockId);
+            saveStateToCloudAndLocal();
+            refreshAllUI();
+            showToast('Horario habilitado nuevamente');
+        };
+
+        function buildWeeklyAvailabilityText() {
+            const weekDates = getWeekDates(appState.weekOffset);
+            const hours = getWorkingHoursList();
+            let lines = [
+                `Hola, ¿cómo estás? Te comparto los horarios disponibles de consultorio para esta semana:`
+            ];
+
+            let hasAny = false;
+            weekDates.forEach(dISO => {
+                const freeHours = hours.filter(h => {
+                    const booked = appState.appointments.some(a => a.date === dISO && a.time === h && a.sessionStatus !== 'Cancelado');
+                    const blocked = appState.blockedSlots.some(b => b.date === dISO && b.time === h);
+                    return !booked && !blocked;
+                });
+                if (freeHours.length > 0) {
+                    hasAny = true;
+                    lines.push(`- ${formatHumanDate(dISO)}: ${freeHours.join(' hs, ')} hs`);
+                }
+            });
+
+            if (!hasAny) {
+                lines.push(`- Sin horarios disponibles en esta semana.`);
+            }
+
+            lines.push(`\nQuedo atenta a que me indiques qué horario te resulta más conveniente para confirmar el turno.\nSaludos cordiales,\n${appState.settings.psychName}`);
+            return lines.join('\n');
+        }
+
+        window.openShareAvailabilityModal = function(preselectedPatientId = '') {
+            const sel = document.getElementById('share-avail-patient');
+            sel.innerHTML = `<option value="">-- Seleccionar paciente --</option>` + appState.patients.map(p =>
+                `<option value="${p.id}" ${p.id === preselectedPatientId ? 'selected' : ''}>${escapeHTML(p.name)} (${escapeHTML(p.phone)})</option>`
+            ).join('');
+
+            if (preselectedPatientId) {
+                const p = appState.patients.find(x => x.id === preselectedPatientId);
+                document.getElementById('share-avail-phone').value = p ? p.phone : '';
+            } else {
+                document.getElementById('share-avail-phone').value = '';
+            }
+
+            document.getElementById('share-avail-textarea').value = buildWeeklyAvailabilityText();
+            document.getElementById('modal-share-availability').classList.remove('hidden');
+        };
+
+        window.closeShareAvailabilityModal = function() {
+            document.getElementById('modal-share-availability').classList.add('hidden');
+        };
+
+        window.onShareAvailPatientSelect = function(patientId) {
+            const p = appState.patients.find(x => x.id === patientId);
+            if (p) document.getElementById('share-avail-phone').value = p.phone;
+        };
+
+        window.regenerateAvailabilityText = function() {
+            document.getElementById('share-avail-textarea').value = buildWeeklyAvailabilityText();
+            showToast('Texto actualizado');
+        };
+
+        window.copyTextareaAvailability = function() {
+            copyTextToClipboard(document.getElementById('share-avail-textarea').value);
+            showToast('Disponibilidad copiada al portapapeles');
+        };
+
+        window.copyWeeklyFreeSlotsToClipboard = function() {
+            copyTextToClipboard(buildWeeklyAvailabilityText());
+            showToast('Disponibilidad semanal copiada');
+        };
+
+        window.sendAvailabilityViaWhatsApp = function() {
+            const phone = cleanPhoneForWhatsApp(document.getElementById('share-avail-phone').value);
+            const text = document.getElementById('share-avail-textarea').value;
+            const url = phone
+                ? `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
+                : `https://wa.me/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+            closeShareAvailabilityModal();
+        };
+
+        // --- 8. VISTA 3: HONORARIOS, COBROS E HISTORIAL ---
+        window.renderFinanzasView = function() {
+            const today = getTodayISO();
+            const activeAppts = appState.appointments.filter(a => a.sessionStatus !== 'Cancelado');
+            const unpaidAll = activeAppts.filter(a => a.paymentStatus === 'unpaid');
+            const overdueAll = unpaidAll.filter(a => a.dueDate < today);
+            const paidAll = appState.appointments.filter(a => a.paymentStatus === 'paid');
+
+            const sumOverdue = overdueAll.reduce((s, a) => s + Number(a.price || 0), 0);
+            const sumPending = unpaidAll.reduce((s, a) => s + Number(a.price || 0), 0);
+            const sumPaid = paidAll.reduce((s, a) => s + Number(a.price || 0), 0);
+
+            document.getElementById('fin-overdue-total').textContent = formatCurrency(sumOverdue);
+            document.getElementById('fin-overdue-sub').textContent = `${overdueAll.length} ${overdueAll.length === 1 ? 'sesión vencida' : 'sesiones vencidas'}`;
+            document.getElementById('fin-pending-total').textContent = formatCurrency(sumPending);
+            document.getElementById('fin-pending-sub').textContent = `${unpaidAll.length} sesiones pendientes`;
+            document.getElementById('fin-paid-total').textContent = formatCurrency(sumPaid);
+            document.getElementById('fin-paid-sub').textContent = `${paidAll.length} cobros acreditados`;
+
+            document.getElementById('fin-unpaid-badge').textContent = unpaidAll.length;
+            document.getElementById('fin-paid-badge').textContent = paidAll.length;
+
+            const filterVal = document.getElementById('fin-unpaid-filter').value;
+            let receivables = [...unpaidAll];
+            if (filterVal === 'overdue') receivables = receivables.filter(a => a.dueDate < today);
+            else if (filterVal === 'upcoming') receivables = receivables.filter(a => a.dueDate >= today);
+            receivables.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+
+            const recEl = document.getElementById('fin-receivables-list');
+            if (receivables.length === 0) {
+                recEl.innerHTML = `
+                    <div class="py-10 text-center space-y-1.5">
+                        <p class="text-xs font-semibold text-clinical-ink">No se registran saldos pendientes en este filtro</p>
+                        <p class="text-xs text-clinical-muted">Todas las sesiones seleccionadas se encuentran al día.</p>
+                    </div>
+                `;
+            } else {
+                recEl.innerHTML = receivables.map(item => {
+                    const isOverdue = item.dueDate < today;
+                    return `
+                        <div class="p-3.5 rounded-xl border ${isOverdue ? 'bg-clinical-overdueBg/40 border-red-200' : 'bg-white border-clinical-border'} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-xs font-semibold text-clinical-ink">${escapeHTML(item.patientName)}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                                        isOverdue ? 'bg-clinical-overdueBg text-clinical-overdueText' : 'bg-clinical-pendingBg text-clinical-pendingText'
+                                    }">
+                                        ${isOverdue ? `Vencido (${formatHumanDate(item.dueDate)})` : `Vence ${formatHumanDate(item.dueDate)}`}
+                                    </span>
+                                </div>
+                                <p class="font-mono-num text-[11px] text-clinical-secondary">
+                                    Sesión: ${formatHumanDate(item.date)} · ${item.time} hs (${item.modality})
+                                </p>
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-clinical-border">
+                                <span class="font-mono-num text-sm font-semibold text-clinical-ink mr-1">${formatCurrency(item.price)}</span>
+                                <button onclick="openConfirmPaymentModal('${item.id}')" class="px-3 py-1.5 rounded-lg btn-primary text-xs font-semibold">
+                                    Registrar cobro
+                                </button>
+                                <button onclick="sendWhatsAppPaymentReminder('${item.id}')" class="px-3 py-1.5 rounded-lg btn-secondary text-xs font-semibold">
+                                    Recordatorio WA
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Historial de transacciones
+            const q = (document.getElementById('fin-history-search').value || '').toLowerCase().trim();
+            let history = [...paidAll].filter(a => {
+                if (!q) return true;
+                return (a.patientName || '').toLowerCase().includes(q) ||
+                       (a.paymentMethod || '').toLowerCase().includes(q);
+            });
+            history.sort((a, b) => (b.paidAt || b.date).localeCompare(a.paidAt || a.date));
+
+            const histEl = document.getElementById('fin-history-list');
+            if (history.length === 0) {
+                histEl.innerHTML = `
+                    <div class="py-10 text-center">
+                        <p class="text-xs text-clinical-muted">Aún no hay transacciones acreditadas en el historial.</p>
+                    </div>
+                `;
+            } else {
+                histEl.innerHTML = history.map(h => `
+                    <div class="p-3 rounded-xl bg-white border border-clinical-border flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <p class="text-xs font-semibold text-clinical-ink truncate">${escapeHTML(h.patientName)}</p>
+                            <p class="font-mono-num text-[11px] text-clinical-secondary mt-0.5">
+                                ${formatHumanDate(h.paidAt || h.date)} · ${escapeHTML(h.paymentMethod || 'Transferencia')}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="font-mono-num text-xs font-semibold text-clinical-paidText">${formatCurrency(h.price)}</span>
+                            <button onclick="sendWhatsAppPaymentReceipt('${h.id}')" title="Enviar comprobante por WhatsApp" class="p-1.5 rounded-lg btn-secondary text-clinical-secondary hover:text-clinical-ink">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>
+                                </svg>
+                            </button>
+                            <button onclick="revertPaymentStatus('${h.id}')" title="Anular cobro" class="p-1.5 rounded-lg btn-secondary text-clinical-muted hover:text-clinical-overdueText">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        };
+
+        window.openConfirmPaymentModal = function(apptId) {
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+            document.getElementById('pay-modal-appt-id').value = appt.id;
+            document.getElementById('pay-modal-patient').textContent = appt.patientName;
+            document.getElementById('pay-modal-date').textContent = `Sesión del ${formatHumanDate(appt.date, true)} (${appt.time} hs)`;
+            document.getElementById('pay-modal-amount').textContent = formatCurrency(appt.price);
+            document.getElementById('pay-modal-send-receipt').checked = false;
+            document.getElementById('modal-confirm-payment').classList.remove('hidden');
+        };
+
+        window.closeConfirmPaymentModal = function() {
+            document.getElementById('modal-confirm-payment').classList.add('hidden');
+        };
+
+        window.executeConfirmPayment = function(method) {
+            const apptId = document.getElementById('pay-modal-appt-id').value;
+            const sendReceipt = document.getElementById('pay-modal-send-receipt').checked;
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+
+            appt.paymentStatus = 'paid';
+            appt.paymentMethod = method;
+            appt.paidAt = getTodayISO();
+
+            saveStateToCloudAndLocal();
+            closeConfirmPaymentModal();
+            refreshAllUI();
+            showToast(`Cobro registrado (${method})`);
+
+            if (sendReceipt) {
+                sendWhatsAppPaymentReceipt(appt.id);
+            }
+        };
+
+        window.revertPaymentStatus = function(apptId) {
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+            appt.paymentStatus = 'unpaid';
+            appt.paymentMethod = '';
+            appt.paidAt = null;
+            saveStateToCloudAndLocal();
+            refreshAllUI();
+            showToast(`Estado contable revertido a pendiente`);
+        };
+
+        // --- 9. VISTA 4: DIRECTORIO DE PACIENTES Y EXPEDIENTE LATERAL ---
+        window.renderPatientsView = function() {
+            const q = (document.getElementById('patient-search-input').value || '').toLowerCase().trim();
+            const filtered = appState.patients.filter(p => {
+                if (!q) return true;
+                return p.name.toLowerCase().includes(q) || p.phone.toLowerCase().includes(q);
+            });
+
+            const grid = document.getElementById('patients-grid');
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full surface-card rounded-xl p-10 text-center space-y-3">
+                        <div class="w-10 h-10 rounded-xl bg-clinical-subtle text-clinical-plum flex items-center justify-center mx-auto">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>
+                            </svg>
+                        </div>
+                        <div class="max-w-sm mx-auto">
+                            <h4 class="text-sm font-semibold text-clinical-ink">Directorio de pacientes vacío</h4>
+                            <p class="text-xs text-clinical-secondary mt-1">
+                                Registrá a tus pacientes con su contacto de WhatsApp y arancel habitual para agilizar la asignación de turnos.
+                            </p>
+                        </div>
+                        <div class="pt-1">
+                            <button onclick="openPatientModal()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl btn-primary text-xs font-semibold">
+                                <span>Dar de alta primer paciente</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                const pAppts = appState.appointments.filter(a => (a.patientId === p.id || a.patientName === p.name) && a.sessionStatus !== 'Cancelado');
+                const unpaid = pAppts.filter(a => a.paymentStatus === 'unpaid');
+                const debt = unpaid.reduce((s, a) => s + Number(a.price || 0), 0);
+
+                return `
+                    <div class="surface-card rounded-xl p-5 hover:border-clinical-borderStrong transition flex flex-col justify-between gap-4">
+                        <div class="space-y-3.5">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-clinical-plumSoft text-clinical-plum font-semibold text-xs flex items-center justify-center shrink-0">
+                                        ${getInitials(p.name)}
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-clinical-ink">${escapeHTML(p.name)}</h4>
+                                        <p class="font-mono-num text-xs text-clinical-secondary">${escapeHTML(p.phone)}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="openPatientHistoryDrawer('${p.id}')" title="Ver expediente de sesiones" class="p-1.5 rounded-lg btn-secondary text-clinical-secondary hover:text-clinical-ink">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/>
+                                        </svg>
+                                    </button>
+                                    <button onclick="openPatientModal('${p.id}')" title="Editar ficha" class="p-1.5 rounded-lg btn-secondary text-clinical-secondary hover:text-clinical-ink">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"/>
+                                        </svg>
+                                    </button>
+                                    <button onclick="deletePatientConfirm('${p.id}')" title="Eliminar paciente" class="p-1.5 rounded-lg btn-secondary text-clinical-secondary hover:text-clinical-overdueText">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div class="p-2.5 rounded-lg bg-clinical-subtle/60 border border-clinical-border">
+                                    <p class="text-[10px] uppercase tracking-wider text-clinical-secondary font-medium">Honorario (${p.modality})</p>
+                                    <p class="font-mono-num text-xs font-semibold text-clinical-ink mt-0.5">${formatCurrency(p.defaultFee)} · ${pAppts.length} ses.</p>
+                                </div>
+                                <div class="p-2.5 rounded-lg ${debt > 0 ? 'bg-clinical-overdueBg/60 border border-red-200' : 'bg-clinical-paidBg/70 border border-emerald-200'}">
+                                    <p class="text-[10px] uppercase tracking-wider font-medium ${debt > 0 ? 'text-clinical-overdueText' : 'text-clinical-paidText'}">Estado contable</p>
+                                    <p class="font-mono-num text-xs font-semibold ${debt > 0 ? 'text-clinical-overdueText' : 'text-clinical-paidText'} mt-0.5">
+                                        ${debt > 0 ? `Debe ${formatCurrency(debt)}` : 'Al día'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            ${p.notes ? `<p class="text-xs text-clinical-secondary bg-clinical-subtle/40 px-3 py-1.5 rounded-lg border border-clinical-border">${escapeHTML(p.notes)}</p>` : ''}
+                        </div>
+
+                        <div class="pt-3 border-t border-clinical-border flex items-center gap-2">
+                            <button onclick="openAppointmentModalForPatient('${p.id}')" class="flex-1 py-2 px-3 rounded-lg btn-primary text-xs font-semibold">
+                                Agendar turno
+                            </button>
+                            <button onclick="openPatientHistoryDrawer('${p.id}')" class="py-2 px-3 rounded-lg btn-secondary text-xs font-semibold">
+                                Historial
+                            </button>
+                            <button onclick="openDirectWhatsAppChat('${p.id}')" title="Abrir WhatsApp" class="p-2 rounded-lg btn-secondary text-clinical-plum">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.openPatientHistoryDrawer = function(patientId) {
+            const p = appState.patients.find(x => x.id === patientId);
+            if (!p) return;
+
+            document.getElementById('drawer-patient-name').textContent = p.name;
+            const appts = appState.appointments
+                .filter(a => a.patientId === p.id || a.patientName === p.name)
+                .sort((a, b) => b.date.localeCompare(a.date));
+
+            const unpaid = appts.filter(a => a.paymentStatus === 'unpaid' && a.sessionStatus !== 'Cancelado');
+            const totalDebt = unpaid.reduce((s, a) => s + Number(a.price || 0), 0);
+
+            document.getElementById('drawer-patient-summary').innerHTML = `
+                <div class="p-3 rounded-lg bg-white border border-clinical-border">
+                    <span class="text-[10px] uppercase tracking-wider text-clinical-secondary font-medium">Total sesiones</span>
+                    <p class="font-mono-num text-sm font-semibold text-clinical-ink mt-0.5">${appts.length}</p>
+                </div>
+                <div class="p-3 rounded-lg bg-white border border-clinical-border">
+                    <span class="text-[10px] uppercase tracking-wider text-clinical-secondary font-medium">Saldo pendiente</span>
+                    <p class="font-mono-num text-sm font-semibold ${totalDebt > 0 ? 'text-clinical-overdueText' : 'text-clinical-paidText'} mt-0.5">${formatCurrency(totalDebt)}</p>
+                </div>
+            `;
+
+            const listEl = document.getElementById('drawer-patient-sessions');
+            if (appts.length === 0) {
+                listEl.innerHTML = `<p class="text-xs text-clinical-muted text-center py-8">No se registran sesiones para este paciente.</p>`;
+            } else {
+                listEl.innerHTML = appts.map(a => `
+                    <div class="p-3 rounded-xl border border-clinical-border bg-white flex items-center justify-between gap-2">
+                        <div>
+                            <p class="font-mono-num text-xs font-semibold text-clinical-ink">${formatHumanDate(a.date, true)} · ${a.time} hs</p>
+                            <p class="text-[11px] text-clinical-secondary mt-0.5">${a.modality} · ${a.sessionStatus || 'Programado'}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-mono-num text-xs font-semibold text-clinical-ink">${formatCurrency(a.price)}</p>
+                            <span class="inline-block text-[10px] font-medium px-2 py-0.5 rounded-full mt-0.5 ${
+                                a.paymentStatus === 'paid'
+                                    ? 'bg-clinical-paidBg text-clinical-paidText'
+                                    : 'bg-clinical-pendingBg text-clinical-pendingText'
+                            }">
+                                ${a.paymentStatus === 'paid' ? 'Acreditado' : 'Pendiente'}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('drawer-btn-wa').onclick = () => openDirectWhatsAppChat(p.id);
+            document.getElementById('drawer-btn-new-appt').onclick = () => {
+                closePatientHistoryDrawer();
+                openAppointmentModalForPatient(p.id);
+            };
+
+            document.getElementById('drawer-patient-history').classList.remove('hidden');
+        };
+
+        window.closePatientHistoryDrawer = function() {
+            document.getElementById('drawer-patient-history').classList.add('hidden');
+        };
+
+        // --- 10. COMUNICACIONES FORMALES POR WHATSAPP (CERO EMOJIS) ---
+        window.sendWhatsAppAppointmentMessage = function(apptId) {
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+            const phone = cleanPhoneForWhatsApp(appt.phone);
+            const msg = `Hola ${appt.patientName}, ¿cómo estás? Te escribo para confirmar nuestro turno del día ${formatHumanDate(appt.date, true)} a las ${appt.time} hs (modalidad ${appt.modality}). Cualquier consulta quedo a disposición.\nSaludos cordiales,\n${appState.settings.psychName}`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+        };
+
+        window.sendWhatsAppPaymentReminder = function(apptId) {
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+            const phone = cleanPhoneForWhatsApp(appt.phone);
+            const bankLine = appState.settings.bankName
+                ? `- Entidad: ${appState.settings.bankName}\n- Alias / CBU: ${appState.settings.alias}`
+                : `- Alias / CBU: ${appState.settings.alias}`;
+            const msg = [
+                `Hola ${appt.patientName}, ¿cómo estás?`,
+                `Te escribo para recordarte que se encuentra pendiente de acreditación el honorario correspondiente a la sesión del día ${formatHumanDate(appt.date)} (${appt.time} hs).`,
+                ``,
+                `- Importe: ${formatCurrency(appt.price)}`,
+                bankLine,
+                ``,
+                `En cuanto realices la transferencia, te agradezco si me enviás el comprobante por este medio para registrarlo. Muchas gracias.`,
+                `Saludos cordiales,`,
+                `${appState.settings.psychName}`
+            ].join('\n');
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+        };
+
+        window.sendWhatsAppPaymentReceipt = function(apptId) {
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+            const phone = cleanPhoneForWhatsApp(appt.phone);
+            const msg = `Hola ${appt.patientName}. Te confirmo la recepción del pago de ${formatCurrency(appt.price)} (${appt.paymentMethod || 'Transferencia'}) correspondiente a la sesión del ${formatHumanDate(appt.date, true)}. Muchas gracias.\nSaludos cordiales,\n${appState.settings.psychName}`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+        };
+
+        window.openDirectWhatsAppChat = function(patientId) {
+            const p = appState.patients.find(x => x.id === patientId);
+            if (!p) return;
+            const phone = cleanPhoneForWhatsApp(p.phone);
+            const msg = `Hola ${p.name}, ¿cómo estás? Te escribe ${appState.settings.psychName}.`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener,noreferrer');
+        };
+
+        // --- 11. GESTIÓN DE MODALES (TURNOS Y PACIENTES) ---
+        function populatePatientDropdown(selectedId = '') {
+            const sel = document.getElementById('appt-patient-id');
+            if (appState.patients.length === 0) {
+                sel.innerHTML = `<option value="">-- Sin pacientes registrados (dar de alta abajo) --</option>`;
+                return;
+            }
+            sel.innerHTML = appState.patients.map(p =>
+                `<option value="${p.id}" ${p.id === selectedId ? 'selected' : ''}>${escapeHTML(p.name)}</option>`
+            ).join('');
+        }
+
+        window.syncDueDateWithApptDate = function(newDate) {
+            const apptId = document.getElementById('appt-id').value;
+            if (!apptId && newDate) {
+                document.getElementById('appt-due-date').value = newDate;
+            }
+        };
+
+        window.openAppointmentModal = function(defaultDate = '', defaultTime = '10:00') {
+            document.getElementById('modal-appt-title').textContent = 'Programar sesión clínica';
+            document.getElementById('appt-id').value = '';
+
+            populatePatientDropdown();
+            if (appState.patients.length > 0) {
+                isCreatingInlinePatient = false;
+                document.getElementById('inline-new-patient-wrap').classList.add('hidden');
+                document.getElementById('existing-patient-select-wrap').classList.remove('hidden');
+                document.getElementById('btn-toggle-new-patient').textContent = '+ Dar de alta nuevo paciente';
+                const p0 = appState.patients[0];
+                document.getElementById('appt-patient-id').value = p0.id;
+                document.getElementById('appt-phone').value = p0.phone;
+                document.getElementById('appt-price').value = p0.defaultFee || appState.settings.defaultFee;
+                document.getElementById('appt-modality').value = p0.modality || 'Online';
+            } else {
+                isCreatingInlinePatient = false;
+                toggleInlineNewPatient();
+                document.getElementById('appt-phone').value = '54911';
+                document.getElementById('appt-price').value = appState.settings.defaultFee;
+                document.getElementById('appt-modality').value = 'Online';
+            }
+
+            const d = defaultDate || appState.selectedDate || getTodayISO();
+            document.getElementById('appt-date').value = d;
+            document.getElementById('appt-due-date').value = d;
+            document.getElementById('appt-time').value = defaultTime || '10:00';
+            document.getElementById('appt-duration').value = '50';
+            document.getElementById('appt-session-status').value = 'Programado';
+            document.getElementById('appt-payment-status').value = 'unpaid';
+            document.getElementById('appt-payment-method').value = 'Transferencia';
+            document.getElementById('appt-notes').value = '';
+            document.getElementById('appt-send-wa-after').checked = false;
+            togglePaymentMethodSelect();
+
+            document.getElementById('modal-appointment').classList.remove('hidden');
+        };
+
+        window.openAppointmentModalForPatient = function(patientId) {
+            openAppointmentModal(appState.selectedDate, '10:00');
+            if (isCreatingInlinePatient) toggleInlineNewPatient();
+            document.getElementById('appt-patient-id').value = patientId;
+            onAppointmentPatientChange(patientId);
+        };
+
+        window.openEditAppointmentModal = function(apptId) {
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+
+            isCreatingInlinePatient = false;
+            document.getElementById('inline-new-patient-wrap').classList.add('hidden');
+            document.getElementById('existing-patient-select-wrap').classList.remove('hidden');
+            document.getElementById('btn-toggle-new-patient').textContent = '+ Dar de alta nuevo paciente';
+
+            document.getElementById('modal-appt-title').textContent = 'Editar sesión clínica';
+            document.getElementById('appt-id').value = appt.id;
+
+            populatePatientDropdown(appt.patientId);
+            document.getElementById('appt-phone').value = appt.phone;
+            document.getElementById('appt-modality').value = appt.modality;
+            document.getElementById('appt-session-status').value = appt.sessionStatus || 'Programado';
+            document.getElementById('appt-date').value = appt.date;
+            document.getElementById('appt-time').value = appt.time;
+            document.getElementById('appt-duration').value = String(appt.duration || 50);
+            document.getElementById('appt-price').value = appt.price;
+            document.getElementById('appt-due-date').value = appt.dueDate;
+            document.getElementById('appt-payment-status').value = appt.paymentStatus;
+            document.getElementById('appt-payment-method').value = appt.paymentMethod || 'Transferencia';
+            document.getElementById('appt-notes').value = appt.notes || '';
+            document.getElementById('appt-send-wa-after').checked = false;
+            togglePaymentMethodSelect();
+
+            document.getElementById('modal-appointment').classList.remove('hidden');
+        };
+
+        window.closeAppointmentModal = function() {
+            document.getElementById('modal-appointment').classList.add('hidden');
+        };
+
+        window.toggleInlineNewPatient = function() {
+            isCreatingInlinePatient = !isCreatingInlinePatient;
+            const inlineWrap = document.getElementById('inline-new-patient-wrap');
+            const selectWrap = document.getElementById('existing-patient-select-wrap');
+            const btn = document.getElementById('btn-toggle-new-patient');
+
+            if (isCreatingInlinePatient) {
+                inlineWrap.classList.remove('hidden');
+                selectWrap.classList.add('hidden');
+                btn.textContent = 'Seleccionar paciente existente';
+                document.getElementById('new-patient-name').value = '';
+                document.getElementById('new-patient-phone').value = '54911';
+            } else {
+                inlineWrap.classList.add('hidden');
+                selectWrap.classList.remove('hidden');
+                btn.textContent = '+ Dar de alta nuevo paciente';
+            }
+        };
+
+        window.onAppointmentPatientChange = function(patientId) {
+            const p = appState.patients.find(x => x.id === patientId);
+            if (!p) return;
+            document.getElementById('appt-phone').value = p.phone;
+            document.getElementById('appt-price').value = p.defaultFee;
+            document.getElementById('appt-modality').value = p.modality || 'Online';
+        };
+
+        window.togglePaymentMethodSelect = function() {
+            const st = document.getElementById('appt-payment-status').value;
+            const wrap = document.getElementById('appt-payment-method-wrap');
+            if (st === 'paid') wrap.classList.remove('hidden');
+            else wrap.classList.add('hidden');
+        };
+
+        window.saveAppointment = function(e) {
+            e.preventDefault();
+            const existingId = document.getElementById('appt-id').value;
+            let patientId = document.getElementById('appt-patient-id').value;
+            let patientName = '';
+            let phone = document.getElementById('appt-phone').value.trim();
+            const price = Number(document.getElementById('appt-price').value) || 0;
+            const modality = document.getElementById('appt-modality').value;
+            const sessionStatus = document.getElementById('appt-session-status').value || 'Programado';
+            const duration = Number(document.getElementById('appt-duration').value) || 50;
+
+            if (isCreatingInlinePatient || appState.patients.length === 0) {
+                const newName = document.getElementById('new-patient-name').value.trim();
+                const newPhone = document.getElementById('new-patient-phone').value.trim() || phone;
+                if (!newName) {
+                    showToast('Ingresá el nombre y apellido del paciente');
+                    return;
+                }
+                const newP = {
+                    id: 'p_' + Date.now(),
+                    name: newName,
+                    phone: newPhone,
+                    defaultFee: price || appState.settings.defaultFee,
+                    modality,
+                    notes: ''
+                };
+                appState.patients.push(newP);
+                patientId = newP.id;
+                patientName = newP.name;
+                phone = newP.phone;
+            } else {
+                const p = appState.patients.find(x => x.id === patientId);
+                patientName = p ? p.name : 'Paciente';
+            }
+
+            const date = document.getElementById('appt-date').value;
+            const time = document.getElementById('appt-time').value;
+            const dueDate = document.getElementById('appt-due-date').value || date;
+            const paymentStatus = document.getElementById('appt-payment-status').value;
+            const paymentMethod = paymentStatus === 'paid' ? document.getElementById('appt-payment-method').value : '';
+            const notes = document.getElementById('appt-notes').value.trim();
+            const sendWa = document.getElementById('appt-send-wa-after').checked;
+
+            let targetApptId = existingId;
+
+            if (existingId) {
+                const idx = appState.appointments.findIndex(a => a.id === existingId);
+                if (idx !== -1) {
+                    appState.appointments[idx] = {
+                        ...appState.appointments[idx],
+                        patientId,
+                        patientName,
+                        phone,
+                        date,
+                        time,
+                        duration,
+                        modality,
+                        sessionStatus,
+                        price,
+                        dueDate,
+                        paymentStatus,
+                        paymentMethod,
+                        paidAt: paymentStatus === 'paid' ? (appState.appointments[idx].paidAt || getTodayISO()) : null,
+                        notes
+                    };
+                }
+                showToast(`Sesión de ${patientName} actualizada`);
+            } else {
+                targetApptId = 'a_' + Date.now();
+                appState.appointments.push({
+                    id: targetApptId,
+                    patientId,
+                    patientName,
+                    phone,
+                    date,
+                    time,
+                    duration,
+                    modality,
+                    sessionStatus,
+                    price,
+                    dueDate,
+                    paymentStatus,
+                    paymentMethod,
+                    paidAt: paymentStatus === 'paid' ? getTodayISO() : null,
+                    notes
+                });
+                showToast(`Sesión agendada para ${patientName}`);
+            }
+
+            appState.selectedDate = date;
+            saveStateToCloudAndLocal();
+            closeAppointmentModal();
+            refreshAllUI();
+
+            if (sendWa && targetApptId) {
+                sendWhatsAppAppointmentMessage(targetApptId);
+            }
+        };
+
+        window.deleteAppointmentConfirm = function(apptId) {
+            const appt = appState.appointments.find(a => a.id === apptId);
+            if (!appt) return;
+            openCustomConfirm(
+                'Eliminar sesión programada',
+                `¿Confirmás la eliminación del turno de ${appt.patientName} (${formatHumanDate(appt.date)} · ${appt.time} hs)?`,
+                () => {
+                    appState.appointments = appState.appointments.filter(a => a.id !== apptId);
+                    saveStateToCloudAndLocal();
+                    refreshAllUI();
+                    showToast('Sesión eliminada de la agenda');
+                }
+            );
+        };
+
+        // --- 12. ALTA, EDICIÓN Y BAJA DE PACIENTES ---
+        window.openPatientModal = function(patientId = '') {
+            if (patientId) {
+                const p = appState.patients.find(x => x.id === patientId);
+                if (!p) return;
+                document.getElementById('modal-patient-title').textContent = 'Editar ficha de paciente';
+                document.getElementById('patient-modal-id').value = p.id;
+                document.getElementById('patient-modal-name').value = p.name;
+                document.getElementById('patient-modal-phone').value = p.phone;
+                document.getElementById('patient-modal-fee').value = p.defaultFee;
+                document.getElementById('patient-modal-modality').value = p.modality || 'Online';
+                document.getElementById('patient-modal-notes').value = p.notes || '';
+            } else {
+                document.getElementById('modal-patient-title').textContent = 'Dar de alta paciente';
+                document.getElementById('patient-modal-id').value = '';
+                document.getElementById('patient-modal-name').value = '';
+                document.getElementById('patient-modal-phone').value = '54911';
+                document.getElementById('patient-modal-fee').value = appState.settings.defaultFee || 25000;
+                document.getElementById('patient-modal-modality').value = 'Online';
+                document.getElementById('patient-modal-notes').value = '';
+            }
+            document.getElementById('modal-patient').classList.remove('hidden');
+        };
+
+        window.closePatientModal = function() {
+            document.getElementById('modal-patient').classList.add('hidden');
+        };
+
+        window.savePatientFromModal = function(e) {
+            e.preventDefault();
+            const id = document.getElementById('patient-modal-id').value;
+            const name = document.getElementById('patient-modal-name').value.trim();
+            const phone = document.getElementById('patient-modal-phone').value.trim();
+            const defaultFee = Number(document.getElementById('patient-modal-fee').value) || 0;
+            const modality = document.getElementById('patient-modal-modality').value;
+            const notes = document.getElementById('patient-modal-notes').value.trim();
+
+            if (id) {
+                const idx = appState.patients.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    appState.patients[idx] = { id, name, phone, defaultFee, modality, notes };
+                    appState.appointments.forEach(a => {
+                        if (a.patientId === id) {
+                            a.patientName = name;
+                            a.phone = phone;
+                        }
+                    });
+                }
+                showToast(`Ficha de ${name} actualizada`);
+            } else {
+                appState.patients.push({
+                    id: 'p_' + Date.now(),
+                    name,
+                    phone,
+                    defaultFee,
+                    modality,
+                    notes
+                });
+                showToast(`Paciente ${name} registrado`);
+            }
+
+            saveStateToCloudAndLocal();
+            closePatientModal();
+            refreshAllUI();
+        };
+
+        window.deletePatientConfirm = function(patientId) {
+            const p = appState.patients.find(x => x.id === patientId);
+            if (!p) return;
+            openCustomConfirm(
+                'Eliminar ficha de paciente',
+                `¿Deseás eliminar a ${p.name} del directorio de pacientes activos?`,
+                () => {
+                    appState.patients = appState.patients.filter(x => x.id !== patientId);
+                    saveStateToCloudAndLocal();
+                    refreshAllUI();
+                    showToast('Paciente eliminado del directorio');
+                }
+            );
+        };
+
+        // --- 13. CONFIGURACIÓN Y PORTABILIDAD (.JSON) ---
+        window.saveSettings = function(e) {
+            e.preventDefault();
+            appState.settings.psychName = document.getElementById('set-psych-name').value.trim() || 'Lic. Laura Kocher';
+            appState.settings.alias = document.getElementById('set-psych-alias').value.trim() || 'laura.kocher.mp';
+            appState.settings.bankName = document.getElementById('set-bank-name').value.trim() || '';
+            appState.settings.defaultFee = Number(document.getElementById('set-default-fee').value) || 25000;
+            appState.settings.startHour = Number(document.getElementById('set-start-hour').value) || 9;
+            appState.settings.endHour = Number(document.getElementById('set-end-hour').value) || 20;
+
+            saveStateToCloudAndLocal();
+            refreshAllUI();
+            showToast('Configuración actualizada y sincronizada');
+        };
+
+        window.exportBackupJSON = function() {
+            const dataStr = JSON.stringify({
+                settings: appState.settings,
+                patients: appState.patients,
+                appointments: appState.appointments,
+                blockedSlots: appState.blockedSlots
+            }, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `consultorio_laura_kocher_${getTodayISO()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Respaldo exportado correctamente');
+        };
+
+        window.importBackupJSON = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.settings) appState.settings = { ...appState.settings, ...parsed.settings };
+                    if (Array.isArray(parsed.patients)) appState.patients = parsed.patients;
+                    if (Array.isArray(parsed.appointments)) appState.appointments = parsed.appointments;
+                    if (Array.isArray(parsed.blockedSlots)) appState.blockedSlots = parsed.blockedSlots;
+                    saveStateToCloudAndLocal();
+                    refreshAllUI();
+                    showToast('Respaldo importado y sincronizado en la nube');
+                } catch (err) {
+                    showToast('El archivo seleccionado no tiene un formato válido');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        };
+
+        window.clearAllDataConfirm = function() {
+            openCustomConfirm(
+                'Reiniciar registros del consultorio',
+                'Se eliminarán todos los pacientes, sesiones y transacciones de esta cuenta. Esta acción no se puede deshacer.',
+                () => {
+                    appState.patients = [];
+                    appState.appointments = [];
+                    appState.blockedSlots = [];
+                    saveStateToCloudAndLocal();
+                    refreshAllUI();
+                    showToast('Registros reiniciados a cero');
+                }
+            );
+        };
+
+        function openCustomConfirm(title, desc, onConfirm) {
+            document.getElementById('confirm-modal-title').textContent = title;
+            document.getElementById('confirm-modal-desc').textContent = desc;
+            const btn = document.getElementById('confirm-modal-action-btn');
+            btn.onclick = () => {
+                closeCustomConfirm();
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+            document.getElementById('modal-custom-confirm').classList.remove('hidden');
+        }
+
+        window.closeCustomConfirm = function() {
+            document.getElementById('modal-custom-confirm').classList.add('hidden');
+        };
+
+        function copyTextToClipboard(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+        }
+
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-clinical-ink text-white shadow-elevated text-xs font-medium animate-view';
+            toast.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-clinical-rose"></span><span>${escapeHTML(msg)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.2s ease';
+                setTimeout(() => toast.remove(), 200);
+            }, 2800);
+        }
+
+        // Inicializar al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            initCloudConnection();
+        });
+    </script>
+</body>
+</html>
